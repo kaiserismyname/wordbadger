@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Word Badger">
+<meta name="theme-color" content="#0a0a0c">
+<title>Word Badger</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0c;
+    --bg2: #111116;
+    --bg3: #17171e;
+    --bg4: #1c1c26;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f0f4;
+    --text2: #8888a0;
+    --text3: #44445a;
+    --accent: #8b7cf6;
+    --accent2: #6b5cd6;
+    --accent-bg: rgba(139,124,246,0.12);
+    --accent-border: rgba(139,124,246,0.3);
+    --green: #4ade80;
+    --amber: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%; width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    position: fixed;
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+    overflow: hidden;
+  }
+  .screen.active { opacity: 1; pointer-events: all; }
+
+  /* status bar safe area */
+  .safe-top { padding-top: max(44px, env(safe-area-inset-top)); }
+  .safe-bottom { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+
+  /* ── TYPOGRAPHY ── */
+  .font-display { font-family: 'Syne', sans-serif; }
+
+  /* ── HOME SCREEN ── */
+  #home { background: var(--bg); }
+
+  .home-header {
+    padding: max(52px, env(safe-area-inset-top)) 20px 0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  .logo-row { display: flex; align-items: center; gap: 10px; }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .logo-mark img { width: 28px; height: 28px; object-fit: contain; filter: brightness(0) invert(1); }
+  .logo-text { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
+
+  .home-scroll {
+    flex: 1; overflow-y: auto; padding: 20px 20px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .stat-row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 24px;
+  }
+  .stat-box {
+    background: var(--bg2); border: .5px solid var(--border);
+    border-radius: 12px; padding: 12px 10px; text-align: center;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700;
+    color: var(--text); display: block; line-height: 1;
+  }
+  .stat-lbl { font-size: 9px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; display: block; }
+
+  .section-label {
+    font-size: 10px; color: var(--text3); letter-spacing: .1em;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+
+  .pack-card {
+    background: var(--bg2); border: .5px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: border-color .15s;
+    -webkit-user-select: none;
+  }
+  .pack-card:active { border-color: var(--border2); background: var(--bg3); }
+
+  .pack-num { font-size: 9px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+  .pack-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .pack-meta-row { display: flex; align-items: center; gap: 8px; }
+  .pack-words { font-size: 11px; color: var(--text2); }
+  .pack-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text3); }
+  .pack-status { font-size: 11px; color: var(--text3); }
+  .pack-bar { height: 2px; background: var(--bg4); border-radius: 2px; margin-top: 10px; }
+  .pack-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width .3s; }
+
+  .pack-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+
+  .new-btn {
+    margin: 12px 0 8px;
+    background: var(--accent); border: none; border-radius: 14px;
+    padding: 14px; color: #fff;
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 8px; width: 100%;
+    -webkit-user-select: none;
+  }
+  .new-btn:active { opacity: .85; transform: scale(.98); }
+
+  /* bottom nav */
+  .bottom-nav {
+    display: flex; justify-content: space-around;
+    padding: 10px 0 max(16px, env(safe-area-inset-bottom));
+    border-top: .5px solid var(--border);
+    background: var(--bg);
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; color: var(--text3); font-size: 10px; cursor: pointer;
+    padding: 2px 12px;
+  }
+  .nav-item.on { color: var(--accent); }
+  .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+
+  /* ── NEW PACK SCREEN ── */
+  #new-pack { background: var(--bg); }
+  .np-header {
+    padding: max(52px, env(safe-area-inset-top)) 20px 16px;
+    display: flex; align-items: center; gap: 12px; border-bottom: .5px solid var(--border);
+  }
+  .back-btn {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: var(--bg2); border: .5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text2); font-size: 18px; line-height: 1;
+  }
+  .np-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 600; color: var(--text); }
+
+  .np-body { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+
+  .field-label { font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 7px; }
+  .text-input {
+    width: 100%; background: var(--bg2); border: .5px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
+    outline: none; resize: none;
+  }
+  .text-input::placeholder { color: var(--text3); }
+  .text-input:focus { border-color: var(--accent-border); }
+
+  .word-textarea {
+    min-height: 160px; line-height: 1.7;
+  }
+
+  .hint-text { font-size: 11px; color: var(--text3); line-height: 1.6; }
+
+  .create-btn {
+    background: var(--accent); border: none; border-radius: 14px;
+    padding: 15px; color: #fff;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; width: 100%; margin-top: auto;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .create-btn:active { opacity: .85; }
+  .create-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .loading-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 16px; flex: 1; padding: 40px;
+  }
+  .spinner {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 2px solid var(--bg4); border-top-color: var(--accent);
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; color: var(--text2); text-align: center; line-height: 1.6; }
+
+  /* ── WORD CARD SCREEN ── */
+  #word-card { background: var(--bg); }
+
+  .wc-header {
+    padding: max(52px, env(safe-area-inset-top)) 20px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: .5px solid var(--border);
+  }
+  .wc-counter { font-size: 10px; color: var(--text3); letter-spacing: .08em; }
+  .wc-pack-name { font-size: 12px; color: var(--text2); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* swipe container */
+  .cards-container {
+    flex: 1; position: relative; overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  .word-card-inner {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    padding: 20px 20px 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .3s;
+  }
+  .word-card-inner.slide-up { transform: translateY(-100%); opacity: 0; }
+  .word-card-inner.slide-down { transform: translateY(100%); opacity: 0; }
+  .word-card-inner.from-below { transform: translateY(100%); opacity: 0; }
+  .word-card-inner.from-above { transform: translateY(-100%); opacity: 0; }
+
+  .word-type-badge {
+    display: inline-block; background: var(--accent-bg);
+    border: .5px solid var(--accent-border);
+    color: var(--accent); font-size: 9px; padding: 3px 9px;
+    border-radius: 6px; letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 10px; align-self: flex-start;
+  }
+
+  .big-word {
+    font-family: 'Syne', sans-serif; font-size: 38px; font-weight: 700;
+    color: var(--text); letter-spacing: -.03em; line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .ipa-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px;
+  }
+  .ipa-text { font-size: 12px; color: var(--text3); }
+  .play-btn {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--bg3); border: .5px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--accent);
+    flex-shrink: 0;
+  }
+  .play-btn svg { width: 10px; height: 10px; fill: currentColor; }
+
+  .tr-strip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg2); border: .5px solid var(--border);
+    border-radius: 9px; padding: 8px 12px; margin-bottom: 14px;
+  }
+  .tr-flag { font-size: 14px; }
+  .tr-val { font-size: 12px; color: var(--text2); flex: 1; }
+
+  /* meaning layers */
+  .meaning-section { margin-bottom: 8px; }
+
+  .root-block {
+    border-top: .5px solid var(--border); padding: 10px 0;
+  }
+  .root-label { font-size: 9px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 5px; }
+  .root-text { font-size: 12px; color: var(--text3); line-height: 1.6; }
+
+  .primary-block {
+    background: var(--bg3); border: .5px solid var(--accent-border);
+    border-radius: 12px; padding: 12px 14px; margin: 8px 0;
+  }
+  .primary-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .primary-badge {
+    font-size: 8px; color: var(--accent); background: var(--accent-bg);
+    border: .5px solid var(--accent-border); border-radius: 4px;
+    padding: 2px 7px; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .freq-track { flex: 1; height: 3px; background: var(--bg4); border-radius: 3px; }
+  .freq-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+  .freq-pct { font-size: 9px; color: var(--text3); }
+  .primary-text { font-size: 13px; color: var(--text); line-height: 1.65; }
+
+  .example-block {
+    border-left: 2px solid var(--accent2); padding: 8px 10px;
+    margin-top: 10px; border-radius: 0 6px 6px 0;
+    background: rgba(139,124,246,0.06);
+  }
+  .ex-en { font-size: 12px; color: #c0c0d8; line-height: 1.6; font-style: italic; }
+  .tr-toggle-btn {
+    margin-top: 6px; background: var(--bg4); border: .5px solid var(--border);
+    border-radius: 5px; padding: 3px 9px; font-size: 10px;
+    color: var(--text3); cursor: pointer; display: inline-block;
+  }
+  .ex-tr { font-size: 11px; color: var(--text3); margin-top: 5px; font-style: italic; display: none; }
+  .ex-tr.vis { display: block; }
+
+  .secondary-layer { border-top: .5px solid var(--border); padding: 9px 0; }
+  .sec-row { display: flex; align-items: flex-start; gap: 8px; }
+  .sec-tag {
+    font-size: 8px; color: var(--text3); background: var(--bg3);
+    border: .5px solid var(--border); border-radius: 4px;
+    padding: 2px 6px; letter-spacing: .07em; text-transform: uppercase;
+    white-space: nowrap; margin-top: 1px; flex-shrink: 0;
+  }
+  .rare-tag {
+    font-size: 8px; color: var(--text3); border: .5px solid var(--border);
+    border-radius: 4px; padding: 2px 6px; letter-spacing: .06em;
+    text-transform: uppercase; white-space: nowrap; margin-top: 1px; flex-shrink: 0;
+    opacity: .5;
+  }
+  .sec-text { font-size: 12px; color: var(--text2); line-height: 1.55; flex: 1; }
+  .dim-text { color: var(--text3); font-size: 11px; }
+  .sec-tr-btn {
+    font-size: 8px; color: var(--text3); border: .5px solid var(--border);
+    background: var(--bg3); border-radius: 4px; padding: 2px 5px;
+    cursor: pointer; flex-shrink: 0; margin-top: 1px;
+  }
+  .sec-tr-val { font-size: 10px; color: var(--text3); font-style: italic; margin-top: 4px; display: none; padding-left: 0; }
+  .sec-tr-val.vis { display: block; }
+
+  .swipe-hint {
+    text-align: center; font-size: 10px; color: var(--text3);
+    padding: 14px 0 max(20px, env(safe-area-inset-bottom));
+    opacity: .5;
+  }
+
+  /* nav arrows */
+  .card-nav-bar {
+    display: flex; gap: 10px; padding: 10px 20px max(16px, env(safe-area-inset-bottom));
+    border-top: .5px solid var(--border);
+  }
+  .nav-arrow {
+    flex: 1; background: var(--bg2); border: .5px solid var(--border);
+    border-radius: 12px; padding: 12px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text2); font-size: 20px;
+    user-select: none; -webkit-user-select: none;
+  }
+  .nav-arrow:active { background: var(--bg3); }
+  .nav-arrow.primary { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent); }
+  .know-btn {
+    flex: 2; background: var(--accent); border: none; border-radius: 12px;
+    padding: 12px; color: #fff;
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .know-btn:active { opacity: .85; }
+
+  /* ── STORY SCREEN ── */
+  #story { background: var(--bg); }
+  .story-header {
+    padding: max(52px, env(safe-area-inset-top)) 20px 14px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: .5px solid var(--border);
+  }
+  .story-icon {
+    width: 36px; height: 36px; background: var(--accent-bg);
+    border: .5px solid var(--accent-border); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); font-size: 18px; flex-shrink: 0;
+  }
+  .story-pack-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); }
+  .story-meta { font-size: 10px; color: var(--text3); letter-spacing: .05em; margin-top: 2px; }
+
+  .story-body { flex: 1; overflow-y: auto; padding: 16px 20px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 12px; }
+
+  /* tone toggle */
+  .tone-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg2); border: .5px solid var(--border);
+    border-radius: 10px; padding: 10px 14px; cursor: pointer;
+  }
+  .tone-left { display: flex; align-items: center; gap: 8px; }
+  .tone-label-sm { font-size: 11px; color: var(--text2); }
+  .tone-active-chip {
+    background: var(--accent-bg); border: .5px solid var(--accent-border);
+    color: var(--accent); font-size: 11px; padding: 3px 10px; border-radius: 20px;
+  }
+  .tone-chevron { font-size: 14px; color: var(--text3); transition: transform .2s; }
+  .tone-chevron.open { transform: rotate(180deg); }
+
+  .tone-drawer { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+  .tone-drawer.open { max-height: 90px; }
+  .tones-wrap { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 0 4px; }
+  .tone-chip {
+    background: var(--bg3); border: .5px solid var(--border);
+    border-radius: 20px; padding: 5px 12px; font-size: 11px;
+    color: var(--text3); cursor: pointer;
+    transition: all .15s;
+  }
+  .tone-chip.on { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent); }
+
+  /* keyword */
+  .kw-row { display: flex; align-items: center; gap: 8px; }
+  .kw-label { font-size: 10px; color: var(--text3); letter-spacing: .08em; white-space: nowrap; text-transform: uppercase; }
+  .kw-input {
+    flex: 1; background: var(--bg2); border: .5px solid var(--border);
+    border-radius: 9px; padding: 10px 12px;
+    color: var(--text); font-size: 13px; outline: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .kw-input::placeholder { color: var(--text3); }
+  .kw-input:focus { border-color: var(--accent-border); }
+  .regen-btn {
+    width: 38px; height: 38px; border-radius: 9px;
+    background: var(--accent-bg); border: .5px solid var(--accent-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); cursor: pointer; font-size: 16px; flex-shrink: 0;
+  }
+  .regen-btn:active { opacity: .7; }
+
+  /* story text area */
+  .story-content {
+    background: var(--bg2); border: .5px solid var(--border);
+    border-radius: 12px; padding: 16px; flex: 1; min-height: 200px;
+    position: relative;
+  }
+  .story-text { font-size: 13px; color: var(--text2); line-height: 2; }
+  .hw { color: #b0a0f8; font-weight: 500; }
+  .story-loading { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 30px 0; }
+  .story-loading .spinner { width: 28px; height: 28px; }
+  .story-loading p { font-size: 12px; color: var(--text3); }
+
+  /* word chips */
+  .used-words { display: flex; flex-wrap: wrap; gap: 5px; }
+  .w-chip { background: var(--bg3); border: .5px solid var(--border); border-radius: 6px; padding: 3px 8px; font-size: 10px; color: var(--text3); }
+  .w-chip.used { border-color: rgba(139,124,246,.3); color: #7868d0; }
+
+  .listen-btn {
+    background: var(--bg3); border: .5px solid var(--accent-border);
+    border-radius: 12px; padding: 12px; color: var(--accent);
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 8px; width: 100%;
+  }
+
+  /* ── API KEY SCREEN ── */
+  #api-setup {
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    padding: max(60px, env(safe-area-inset-top)) 28px max(40px, env(safe-area-inset-bottom));
+  }
+  #api-setup.active { display: flex; }
+  .api-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+  .api-logo-mark {
+    width: 48px; height: 48px; background: var(--accent);
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .api-logo-mark img { width: 40px; height: 40px; object-fit: contain; filter: brightness(0) invert(1); }
+  .api-logo-text { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); }
+
+  .api-headline { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
+  .api-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 32px; }
+  .api-sub a { color: var(--accent); text-decoration: none; }
+
+  .api-field-label { font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+  .api-input {
+    width: 100%; background: var(--bg2); border: .5px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    color: var(--text); font-size: 14px; outline: none;
+    font-family: 'Inter', sans-serif; letter-spacing: .02em;
+  }
+  .api-input:focus { border-color: var(--accent-border); }
+  .api-input::placeholder { color: var(--text3); }
+
+  .api-btn {
+    margin-top: 16px; background: var(--accent); border: none;
+    border-radius: 14px; padding: 16px; color: #fff;
+    font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+    cursor: pointer; width: 100%;
+  }
+  .api-btn:active { opacity: .85; }
+
+  .api-note { font-size: 11px; color: var(--text3); margin-top: 16px; line-height: 1.7; text-align: center; }
+  .api-note a { color: var(--accent); text-decoration: none; }
+
+  /* toast */
+  .toast {
+    position: fixed; bottom: max(90px, calc(env(safe-area-inset-bottom) + 80px));
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--bg3); border: .5px solid var(--border2);
+    border-radius: 10px; padding: 10px 18px;
+    font-size: 13px; color: var(--text2);
+    opacity: 0; transition: all .25s; pointer-events: none;
+    white-space: nowrap; z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- API SETUP SCREEN -->
+<div id="api-setup" class="screen active">
+  <div class="api-logo">
+    <div class="api-logo-mark">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Badger-badger.jpg/240px-Badger-badger.jpg" alt="" onerror="this.style.display='none';this.parentElement.innerHTML='🦡'">
+    </div>
+    <div class="api-logo-text">Word Badger</div>
+  </div>
+
+  <div class="api-headline">Enter your<br>Anthropic API key</div>
+  <div class="api-sub">
+    Word Badger uses AI to deeply analyze vocabulary. Your key is stored only on this device.<br><br>
+    Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+  </div>
+
+  <div class="api-field-label">API Key</div>
+  <input class="api-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off" autocorrect="off" spellcheck="false">
+  <button class="api-btn" onclick="saveApiKey()">Start Learning →</button>
+  <div class="api-note">Your key never leaves your device. It's saved locally in your browser.</div>
+</div>
+
+<!-- HOME SCREEN -->
+<div id="home" class="screen">
+  <div class="home-header">
+    <div class="logo-row">
+      <div class="logo-mark">🦡</div>
+      <div class="logo-text">Word Badger</div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);letter-spacing:.04em" id="home-date"></div>
+  </div>
+
+  <div class="home-scroll" id="home-scroll">
+    <div style="height:16px"></div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <span class="stat-num" id="stat-words">0</span>
+        <span class="stat-lbl">Words</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num" id="stat-packs">0</span>
+        <span class="stat-lbl">Packs</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num" id="stat-done">0</span>
+        <span class="stat-lbl">Learned</span>
+      </div>
+    </div>
+
+    <div class="section-label">Your Study Packs</div>
+    <div id="pack-list"></div>
+    <div style="height:8px"></div>
+  </div>
+
+  <div style="padding:0 20px 8px">
+    <button class="new-btn" onclick="showScreen('new-pack')">
+      <span style="font-size:18px">+</span> New Study Pack
+    </button>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item on">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Packs
+    </div>
+    <div class="nav-item" onclick="showScreen('new-pack')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      New
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Stats
+    </div>
+  </div>
+</div>
+
+<!-- NEW PACK SCREEN -->
+<div id="new-pack" class="screen">
+  <div class="np-header">
+    <div class="back-btn" onclick="showScreen('home')">‹</div>
+    <div class="np-title">New Study Pack</div>
+  </div>
+
+  <div class="np-body" id="np-body">
+    <div>
+      <div class="field-label">Pack Name (optional)</div>
+      <input class="text-input" id="pack-name-input" type="text" placeholder="e.g. Words from this week, Netflix vocab...">
+    </div>
+    <div>
+      <div class="field-label">Paste your word list</div>
+      <textarea class="text-input word-textarea" id="word-list-input" placeholder="nonchalant&#10;audacity&#10;volatile&#10;manipulative&#10;dispassionate&#10;&#10;Paste any format — one per line, comma separated, messy notes... AI will clean it up."></textarea>
+    </div>
+    <div class="hint-text">
+      Paste words in any format. The AI will automatically clean duplicates, fix formatting, and deeply analyze each word.
+    </div>
+    <button class="create-btn" id="create-btn" onclick="createPack()">
+      <span>Analyze with AI</span> <span style="font-size:16px">→</span>
+    </button>
+  </div>
+
+  <!-- loading state shown inside np-body -->
+</div>
+
+<!-- WORD CARD SCREEN -->
+<div id="word-card" class="screen">
+  <div class="wc-header">
+    <div class="back-btn" onclick="exitCards()" style="width:32px;height:32px;border-radius:9px;background:var(--bg2);border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:18px">‹</div>
+    <div style="text-align:center">
+      <div class="wc-pack-name" id="wc-pack-name">Pack</div>
+      <div class="wc-counter" id="wc-counter">1 / 1</div>
+    </div>
+    <div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:18px" onclick="openStory()">✦</div>
+  </div>
+
+  <div class="cards-container" id="cards-container">
+    <div class="word-card-inner" id="card-inner">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <div class="card-nav-bar">
+    <div class="nav-arrow" onclick="prevCard()">←</div>
+    <div class="know-btn" onclick="markKnown()">✓ I know this</div>
+    <div class="nav-arrow primary" onclick="nextCard()">→</div>
+  </div>
+</div>
+
+<!-- STORY SCREEN -->
+<div id="story" class="screen">
+  <div class="story-header">
+    <div class="back-btn" onclick="showScreen('word-card')" style="width:32px;height:32px;border-radius:9px;background:var(--bg2);border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:18px">‹</div>
+    <div style="flex:1">
+      <div class="story-pack-name" id="story-pack-name">Story Mode</div>
+      <div class="story-meta" id="story-meta">AI-generated immersive story</div>
+    </div>
+  </div>
+
+  <div class="story-body">
+    <div class="tone-toggle" onclick="toggleToneDrawer()">
+      <div class="tone-left">
+        <span style="font-size:14px">🎭</span>
+        <span class="tone-label-sm">Tone</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="tone-active-chip" id="active-tone">Dark</span>
+        <span class="tone-chevron" id="tone-chev">▾</span>
+      </div>
+    </div>
+    <div class="tone-drawer" id="tone-drawer">
+      <div class="tones-wrap">
+        <div class="tone-chip on" onclick="selectTone(this)">Dark</div>
+        <div class="tone-chip" onclick="selectTone(this)">Cinematic</div>
+        <div class="tone-chip" onclick="selectTone(this)">Romantic</div>
+        <div class="tone-chip" onclick="selectTone(this)">Philosophical</div>
+        <div class="tone-chip" onclick="selectTone(this)">Funny</div>
+        <div class="tone-chip" onclick="selectTone(this)">Sci-fi</div>
+        <div class="tone-chip" onclick="selectTone(this)">Historical</div>
+        <div class="tone-chip" onclick="selectTone(this)">Daily life</div>
+        <div class="tone-chip" onclick="selectTone(this)">Motivational</div>
+      </div>
+    </div>
+
+    <div class="kw-row">
+      <span class="kw-label">Topic</span>
+      <input class="kw-input" id="story-topic" placeholder="Istanbul, chess, a breakup, space...">
+      <div class="regen-btn" onclick="generateStory()">↺</div>
+    </div>
+
+    <div class="story-content" id="story-content">
+      <div class="story-loading">
+        <div class="spinner"></div>
+        <p>Generating your story...</p>
+      </div>
+    </div>
+
+    <div class="used-words" id="story-word-chips"></div>
+
+    <button class="listen-btn" onclick="listenStory()">▶ Listen (coming soon)</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let API_KEY = localStorage.getItem('wb_api_key') || '';
+let packs = JSON.parse(localStorage.getItem('wb_packs') || '[]');
+let currentPack = null;
+let currentWordIndex = 0;
+let currentTone = 'Dark';
+let storyText = '';
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  document.getElementById('home-date').textContent = new Date().toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+  if (API_KEY) {
+    showScreen('home');
+    renderHome();
+  } else {
+    showScreen('api-setup');
+  }
+});
+
+// ── SCREENS ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key.startsWith('sk-ant')) { showToast('Invalid key format'); return; }
+  API_KEY = key;
+  localStorage.setItem('wb_api_key', key);
+  showScreen('home');
+  renderHome();
+}
+
+// ── HOME ──
+function renderHome() {
+  const totalWords = packs.reduce((s, p) => s + (p.words ? p.words.length : 0), 0);
+  const learned = packs.reduce((s, p) => s + (p.known ? p.known.length : 0), 0);
+  document.getElementById('stat-words').textContent = totalWords;
+  document.getElementById('stat-packs').textContent = packs.length;
+  document.getElementById('stat-done').textContent = learned;
+
+  const list = document.getElementById('pack-list');
+  if (packs.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.8">No packs yet.<br>Create your first study pack.</div>`;
+    return;
+  }
+  list.innerHTML = packs.slice().reverse().map((p, ri) => {
+    const i = packs.length - 1 - ri;
+    const known = p.known ? p.known.length : 0;
+    const total = p.words ? p.words.length : 0;
+    const pct = total ? Math.round((known/total)*100) : 0;
+    const colors = ['#8b7cf6','#f59e0b','#34d399','#f87171','#60a5fa'];
+    const col = colors[i % colors.length];
+    const status = pct === 100 ? 'Completed' : pct > 0 ? `${pct}% done` : 'Not started';
+    const date = p.created ? new Date(p.created).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    return `<div class="pack-card" onclick="openPack(${i})">
+      <div class="pack-accent" style="background:${col}"></div>
+      <div style="padding-left:8px">
+        <div class="pack-num">PACK ${String(i+1).padStart(2,'0')} · ${date}</div>
+        <div class="pack-name">${p.name || 'Pack ' + (i+1)}</div>
+        <div class="pack-meta-row">
+          <span class="pack-words">${total} words</span>
+          <div class="pack-dot"></div>
+          <span class="pack-status">${status}</span>
+        </div>
+        <div class="pack-bar"><div class="pack-fill" style="width:${pct}%;background:${col}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CREATE PACK ──
+async function createPack() {
+  const raw = document.getElementById('word-list-input').value.trim();
+  const name = document.getElementById('pack-name-input').value.trim();
+  if (!raw) { showToast('Please paste some words first'); return; }
+
+  const btn = document.getElementById('create-btn');
+  const body = document.getElementById('np-body');
+  btn.disabled = true;
+
+  body.innerHTML = `<div class="loading-state">
+    <div class="spinner"></div>
+    <div class="loading-text">AI is analyzing your vocabulary...<br><br>This may take 30–60 seconds<br>depending on the number of words.</div>
+  </div>`;
+
+  try {
+    const words = await analyzeWords(raw);
+    const pack = {
+      id: Date.now(),
+      name: name || 'Pack ' + (packs.length + 1),
+      created: new Date().toISOString(),
+      words: words,
+      known: []
+    };
+    packs.push(pack);
+    savePacks();
+    renderHome();
+    openPack(packs.length - 1);
+  } catch(e) {
+    body.innerHTML = `<div class="loading-state">
+      <div style="font-size:32px">⚠</div>
+      <div class="loading-text">Something went wrong.<br>${e.message}<br><br>Check your API key and try again.</div>
+      <button class="create-btn" onclick="showScreen('new-pack')" style="margin-top:16px">Try Again</button>
+    </div>`;
+  }
+}
+
+async function analyzeWords(raw) {
+  const prompt = `You are a vocabulary analysis AI for Word Badger, an advanced English vocabulary learning app for Turkish speakers.
+
+The user has pasted a raw list of English words. Your job:
+1. Extract all unique English words/phrases (ignore duplicates, fix formatting, remove numbers/symbols)
+2. For each word, generate a complete analysis JSON
+
+Return ONLY a JSON array. No explanation, no markdown, no backticks. Just the raw JSON array.
+
+Each item must follow this exact structure:
+{
+  "word": "nonchalant",
+  "type": "adjective",
+  "ipa": "/ˌnɒn.ʃəˈlɑːnt/",
+  "syllables": "non·cha·lant",
+  "tr_quick": "umursamaz, kayıtsız, soğukkanlı",
+  "root": "From French 'nonchaloir' — to not be warm about. Literally: without passion or heat.",
+  "primary_usage": {
+    "label": "MOST COMMON USE",
+    "frequency": 91,
+    "text": "Acting deliberately unbothered to project confidence or coolness — even when you do care.",
+    "example_en": "She walked in late, acting completely nonchalant about it.",
+    "example_tr": "Geç geldi ama hiç umursamaz bir tavırla davrandı."
+  },
+  "secondary": [
+    {
+      "tag": "EMOTIONAL",
+      "text": "Can signal genuine indifference, or emotional unavailability in close relationships.",
+      "tr": "İlişkilerde gerçek ilgisizliği ya da duygusal erişilemezliği gösterebilir.",
+      "rare": false
+    },
+    {
+      "tag": "LITERARY",
+      "text": "In literary contexts, a nonchalant character often masks deeper internal conflict.",
+      "tr": "Edebi bağlamda umursamaz karakter genellikle derin bir çatışmayı gizler.",
+      "rare": true
+    }
+  ]
+}
+
+Raw word list:
+${raw}
+
+Return the JSON array now. Maximum 40 words. If more are given, pick the most interesting/useful ones.`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 8000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || 'API error ' + res.status);
+  }
+
+  const data = await res.json();
+  const text = data.content[0].text.trim();
+  const clean = text.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+  return JSON.parse(clean);
+}
+
+// ── OPEN PACK ──
+function openPack(index) {
+  currentPack = packs[index];
+  currentWordIndex = 0;
+  document.getElementById('wc-pack-name').textContent = currentPack.name;
+  renderCard(currentWordIndex);
+  showScreen('word-card');
+}
+
+function exitCards() {
+  showScreen('home');
+  renderHome();
+}
+
+// ── RENDER CARD ──
+function renderCard(idx, direction) {
+  if (!currentPack || !currentPack.words[idx]) return;
+  const w = currentPack.words[idx];
+  const total = currentPack.words.length;
+  document.getElementById('wc-counter').textContent = `${idx+1} / ${total}`;
+
+  const isKnown = currentPack.known && currentPack.known.includes(w.word);
+  const secondaryHTML = (w.secondary || []).map((s, si) => `
+    <div class="secondary-layer">
+      <div class="sec-row">
+        ${s.rare ? `<span class="rare-tag">${s.tag}</span>` : `<span class="sec-tag">${s.tag}</span>`}
+        <span class="sec-text ${s.rare ? 'dim-text' : ''}">${s.text}</span>
+        <span class="sec-tr-btn" onclick="toggleSecTr('str${si}')">TR</span>
+      </div>
+      <div class="sec-tr-val" id="str${si}">${s.tr || ''}</div>
+    </div>
+  `).join('');
+
+  const html = `
+    <span class="word-type-badge">${w.type || 'word'}</span>
+    <div class="big-word">${w.word}</div>
+    <div class="ipa-row">
+      <div class="play-btn" onclick="speakWord('${w.word}')">
+        <svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg>
+      </div>
+      <span class="ipa-text">${w.ipa || ''}</span>
+      <span style="color:var(--text3);font-size:11px;margin-left:4px">${w.syllables || ''}</span>
+    </div>
+
+    <div class="tr-strip">
+      <span class="tr-flag">🇹🇷</span>
+      <span class="tr-val">${w.tr_quick || ''}</span>
+    </div>
+
+    ${w.root ? `<div class="root-block">
+      <div class="root-label">Root & Origin</div>
+      <div class="root-text">${w.root}</div>
+    </div>` : ''}
+
+    ${w.primary_usage ? `<div class="primary-block">
+      <div class="primary-header">
+        <span class="primary-badge">${w.primary_usage.label || 'MOST COMMON'}</span>
+        <div class="freq-track"><div class="freq-fill" style="width:${w.primary_usage.frequency||80}%"></div></div>
+        <span class="freq-pct">${w.primary_usage.frequency||80}%</span>
+      </div>
+      <div class="primary-text">${w.primary_usage.text}</div>
+      ${w.primary_usage.example_en ? `<div class="example-block">
+        <div class="ex-en">"${w.primary_usage.example_en}"</div>
+        <span class="tr-toggle-btn" onclick="toggleExTr('ex-tr-0')">🇹🇷 TR</span>
+        <div class="ex-tr" id="ex-tr-0">${w.primary_usage.example_tr || ''}</div>
+      </div>` : ''}
+    </div>` : ''}
+
+    ${secondaryHTML}
+
+    ${isKnown ? '<div style="text-align:center;padding:10px 0;font-size:11px;color:var(--green)">✓ Marked as known</div>' : ''}
+    <div class="swipe-hint">← prev · → next · ✦ story</div>
+  `;
+
+  const inner = document.getElementById('card-inner');
+  inner.innerHTML = html;
+  inner.scrollTop = 0;
+}
+
+function toggleExTr(id) {
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle('vis');
+}
+function toggleSecTr(id) {
+  const el = document.getElementById(id);
+  if(el) el.classList.toggle('vis');
+}
+
+function nextCard() {
+  if (!currentPack) return;
+  if (currentWordIndex < currentPack.words.length - 1) {
+    currentWordIndex++;
+    renderCard(currentWordIndex, 'next');
+  } else {
+    showToast('Last word! Tap ✦ for Story Mode');
+  }
+}
+
+function prevCard() {
+  if (currentWordIndex > 0) {
+    currentWordIndex--;
+    renderCard(currentWordIndex, 'prev');
+  }
+}
+
+function markKnown() {
+  if (!currentPack || !currentPack.words[currentWordIndex]) return;
+  const w = currentPack.words[currentWordIndex].word;
+  if (!currentPack.known) currentPack.known = [];
+  if (!currentPack.known.includes(w)) {
+    currentPack.known.push(w);
+    savePacks();
+    showToast('Marked as known ✓');
+    renderCard(currentWordIndex);
+  }
+  nextCard();
+}
+
+function speakWord(word) {
+  if ('speechSynthesis' in window) {
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang = 'en-US'; u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+// ── STORY ──
+function openStory() {
+  if (!currentPack) return;
+  document.getElementById('story-pack-name').textContent = currentPack.name;
+  document.getElementById('story-meta').textContent = `${currentPack.words.length} words · regenerate anytime`;
+  renderWordChips();
+  showScreen('story');
+  generateStory();
+}
+
+function renderWordChips() {
+  const chips = document.getElementById('story-word-chips');
+  if (!currentPack) return;
+  chips.innerHTML = (currentPack.words || []).slice(0, 12).map(w =>
+    `<div class="w-chip">${w.word}</div>`
+  ).join('');
+}
+
+let toneDrawerOpen = false;
+function toggleToneDrawer() {
+  toneDrawerOpen = !toneDrawerOpen;
+  document.getElementById('tone-drawer').classList.toggle('open', toneDrawerOpen);
+  document.getElementById('tone-chev').classList.toggle('open', toneDrawerOpen);
+}
+
+function selectTone(el) {
+  document.querySelectorAll('.tone-chip').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  currentTone = el.textContent;
+  document.getElementById('active-tone').textContent = currentTone;
+  toggleToneDrawer();
+}
+
+async function generateStory() {
+  if (!currentPack || !currentPack.words) return;
+  const topic = document.getElementById('story-topic').value.trim();
+  const words = currentPack.words.map(w => w.word).join(', ');
+  const content = document.getElementById('story-content');
+
+  content.innerHTML = `<div class="story-loading"><div class="spinner"></div><p>Writing your story...</p></div>`;
+
+  const topicLine = topic ? `The story must be set in or around the theme of: "${topic}".` : '';
+  const prompt = `Write a ${currentTone.toLowerCase()} immersive short story (300-400 words) for an English vocabulary learner.
+
+Rules:
+- Naturally use ALL of these words at least once, most at least twice: ${words}
+- The story should make the meaning of each word feel obvious from context
+- Make it emotionally engaging and human — NOT like a textbook
+- ${topicLine}
+- Bold the vocabulary words by wrapping them in <b> tags
+- Write in fluent, modern American English
+- No chapter titles, no preamble, just the story
+
+Story:`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    storyText = data.content[0].text;
+    const styledText = storyText.replace(/<b>(.*?)<\/b>/g, '<span class="hw">$1</span>');
+    content.innerHTML = `<div class="story-text">${styledText.replace(/\n\n/g,'<br><br>')}</div>`;
+
+    // update chips
+    const chips = document.getElementById('story-word-chips');
+    const usedWords = (currentPack.words||[]).filter(w => storyText.toLowerCase().includes(w.word.toLowerCase()));
+    chips.innerHTML = (currentPack.words||[]).slice(0,12).map(w => {
+      const used = storyText.toLowerCase().includes(w.word.toLowerCase());
+      return `<div class="w-chip ${used?'used':''}">${w.word}</div>`;
+    }).join('');
+  } catch(e) {
+    content.innerHTML = `<div class="story-loading"><p style="color:var(--text3)">Error generating story.<br>${e.message}</p></div>`;
+  }
+}
+
+function listenStory() {
+  if (!storyText) return;
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const clean = storyText.replace(/<[^>]*>/g,'');
+    const u = new SpeechSynthesisUtterance(clean);
+    u.lang = 'en-US'; u.rate = 0.88;
+    window.speechSynthesis.speak(u);
+    showToast('Playing story audio...');
+  }
+}
+
+// ── UTILS ──
+function savePacks() { localStorage.setItem('wb_packs', JSON.stringify(packs)); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// swipe gesture
+let touchStartY = 0;
+document.getElementById('cards-container').addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, {passive:true});
+document.getElementById('cards-container').addEventListener('touchend', e => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (Math.abs(dy) > 50) { dy > 0 ? nextCard() : prevCard(); }
+}, {passive:true});
+</script>
+</body>
+</html>
