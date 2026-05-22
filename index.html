@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0a0c">
 <title>Word Badger</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
 
   :root {
     --bg: #0a0a0c;
@@ -26,539 +26,248 @@
     --accent-bg: rgba(139,124,246,0.12);
     --accent-border: rgba(139,124,246,0.3);
     --green: #4ade80;
-    --amber: #fbbf24;
+    --red: #f87171;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; width: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; position: fixed; }
 
-  html, body {
-    height: 100%; width: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    overflow: hidden;
-    position: fixed;
-  }
-
-  /* ── SCREENS ── */
-  .screen {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    opacity: 0; pointer-events: none;
-    transition: opacity .25s ease;
-    overflow: hidden;
-  }
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity .25s ease; overflow: hidden; }
   .screen.active { opacity: 1; pointer-events: all; }
 
-  /* status bar safe area */
-  .safe-top { padding-top: max(44px, env(safe-area-inset-top)); }
-  .safe-bottom { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+  /* ── SHARED ── */
+  .font-display { font-family: 'DM Sans', sans-serif; }
+  .back-btn { width: 32px; height: 32px; border-radius: 9px; background: var(--bg2); border: .5px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); font-size: 18px; line-height: 1; flex-shrink: 0; }
+  .bottom-nav { display: flex; justify-content: space-around; padding: 10px 0 max(16px, env(safe-area-inset-bottom)); border-top: .5px solid var(--border); background: var(--bg); flex-shrink: 0; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text3); font-size: 10px; cursor: pointer; padding: 2px 12px; }
+  .nav-item.on { color: var(--accent); }
+  .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+  .section-label { font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; }
+  .spinner { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--bg4); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── TYPOGRAPHY ── */
-  .font-display { font-family: 'Syne', sans-serif; }
+  /* ── API SETUP ── */
+  #api-setup { background: var(--bg); display: flex; flex-direction: column; padding: max(60px, env(safe-area-inset-top)) 28px max(40px, env(safe-area-inset-bottom)); }
+  #api-setup.active { display: flex; }
+  .api-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+  .api-logo-img { width: 52px; height: 52px; object-fit: contain; }
+  .api-logo-text { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); }
+  .api-headline { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
+  .api-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 32px; }
+  .api-sub a { color: var(--accent); text-decoration: none; }
+  .api-field-label { font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+  .api-input { width: 100%; background: var(--bg2); border: .5px solid var(--border); border-radius: 12px; padding: 14px 16px; color: var(--text); font-size: 14px; outline: none; font-family: 'Inter', sans-serif; }
+  .api-input:focus { border-color: var(--accent-border); }
+  .api-input::placeholder { color: var(--text3); }
+  .api-btn { margin-top: 16px; background: var(--accent); border: none; border-radius: 14px; padding: 16px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; }
+  .api-note { font-size: 11px; color: var(--text3); margin-top: 16px; line-height: 1.7; text-align: center; }
 
-  /* ── HOME SCREEN ── */
+  /* ── HOME ── */
   #home { background: var(--bg); }
-
-  .home-header {
-    padding: max(52px, env(safe-area-inset-top)) 20px 0;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-
+  .home-header { padding: max(52px, env(safe-area-inset-top)) 20px 0; display: flex; justify-content: space-between; align-items: center; }
   .logo-row { display: flex; align-items: center; gap: 10px; }
-  .logo-mark {
-    width: 32px; height: 32px;
-    background: var(--accent);
-    border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-  }
-  .logo-mark img { width: 28px; height: 28px; object-fit: contain; filter: brightness(0) invert(1); }
-  .logo-text { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
-
-  .home-scroll {
-    flex: 1; overflow-y: auto; padding: 20px 20px 0;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .stat-row {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 8px; margin-bottom: 24px;
-  }
-  .stat-box {
-    background: var(--bg2); border: .5px solid var(--border);
-    border-radius: 12px; padding: 12px 10px; text-align: center;
-  }
-  .stat-num {
-    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700;
-    color: var(--text); display: block; line-height: 1;
-  }
+  .logo-img { width: 30px; height: 30px; object-fit: contain; }
+  .logo-text { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
+  .home-scroll { flex: 1; overflow-y: auto; padding: 16px 20px 0; -webkit-overflow-scrolling: touch; }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px; }
+  .stat-box { background: var(--bg2); border: .5px solid var(--border); border-radius: 12px; padding: 12px 10px; text-align: center; }
+  .stat-num { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); display: block; line-height: 1; }
   .stat-lbl { font-size: 9px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; display: block; }
-
-  .section-label {
-    font-size: 10px; color: var(--text3); letter-spacing: .1em;
-    text-transform: uppercase; margin-bottom: 10px;
-  }
-
-  .pack-card {
-    background: var(--bg2); border: .5px solid var(--border);
-    border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
-    cursor: pointer; position: relative; overflow: hidden;
-    transition: border-color .15s;
-    -webkit-user-select: none;
-  }
-  .pack-card:active { border-color: var(--border2); background: var(--bg3); }
-
+  .pack-card { background: var(--bg2); border: .5px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; position: relative; overflow: hidden; }
+  .pack-card:active { background: var(--bg3); }
+  .pack-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+  .pack-inner { padding-left: 8px; }
   .pack-num { font-size: 9px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
-  .pack-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-  .pack-meta-row { display: flex; align-items: center; gap: 8px; }
+  .pack-name { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .pack-meta-row { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+  .pack-meta-left { display: flex; align-items: center; gap: 8px; }
   .pack-words { font-size: 11px; color: var(--text2); }
   .pack-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text3); }
   .pack-status { font-size: 11px; color: var(--text3); }
+  .pack-delete { width: 28px; height: 28px; border-radius: 7px; background: rgba(248,113,113,0.1); border: .5px solid rgba(248,113,113,0.2); display: flex; align-items: center; justify-content: center; color: var(--red); font-size: 14px; cursor: pointer; flex-shrink: 0; }
   .pack-bar { height: 2px; background: var(--bg4); border-radius: 2px; margin-top: 10px; }
-  .pack-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width .3s; }
+  .pack-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+  .new-btn { margin: 10px 0 6px; background: var(--accent); border: none; border-radius: 14px; padding: 14px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+  .new-btn:active { opacity: .85; }
 
-  .pack-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+  /* ── QUICK LOOKUP ── */
+  #quick-lookup { background: var(--bg); }
+  .ql-header { padding: max(52px, env(safe-area-inset-top)) 20px 16px; border-bottom: .5px solid var(--border); }
+  .ql-title { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .ql-sub { font-size: 12px; color: var(--text3); }
+  .ql-body { flex: 1; overflow-y: auto; padding: 16px 20px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 12px; }
+  .ql-input-row { display: flex; gap: 8px; }
+  .ql-input { flex: 1; background: var(--bg2); border: .5px solid var(--border); border-radius: 12px; padding: 13px 16px; color: var(--text); font-size: 16px; outline: none; font-family: 'Inter', sans-serif; }
+  .ql-input:focus { border-color: var(--accent-border); }
+  .ql-input::placeholder { color: var(--text3); }
+  .ql-btn { background: var(--accent); border: none; border-radius: 12px; padding: 13px 18px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .ql-result { background: var(--bg2); border: .5px solid var(--border); border-radius: 14px; padding: 16px; display: none; flex-direction: column; gap: 12px; }
+  .ql-result.vis { display: flex; }
+  .ql-word { font-family: 'DM Sans', sans-serif; font-size: 30px; font-weight: 700; color: var(--text); letter-spacing: -.02em; }
+  .ql-ipa { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+  .ql-play { width: 24px; height: 24px; border-radius: 50%; background: var(--bg3); border: .5px solid var(--border2); display: flex; align-items: center; justify-content: center; color: var(--accent); cursor: pointer; font-size: 9px; }
+  .ql-tr { background: var(--bg3); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text2); }
+  .ql-section { border-top: .5px solid var(--border); padding-top: 10px; }
+  .ql-section-label { font-size: 9px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+  .ql-section-text { font-size: 13px; color: var(--text); line-height: 1.65; }
+  .ql-example { border-left: 2px solid var(--accent2); padding: 7px 10px; background: rgba(139,124,246,0.06); border-radius: 0 6px 6px 0; font-size: 12px; color: #c0c0d8; font-style: italic; line-height: 1.6; margin-top: 8px; }
+  .ql-loading { display: flex; align-items: center; gap: 12px; padding: 20px 0; }
+  .ql-loading p { font-size: 13px; color: var(--text3); }
 
-  .new-btn {
-    margin: 12px 0 8px;
-    background: var(--accent); border: none; border-radius: 14px;
-    padding: 14px; color: #fff;
-    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    gap: 8px; width: 100%;
-    -webkit-user-select: none;
-  }
-  .new-btn:active { opacity: .85; transform: scale(.98); }
-
-  /* bottom nav */
-  .bottom-nav {
-    display: flex; justify-content: space-around;
-    padding: 10px 0 max(16px, env(safe-area-inset-bottom));
-    border-top: .5px solid var(--border);
-    background: var(--bg);
-  }
-  .nav-item {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 4px; color: var(--text3); font-size: 10px; cursor: pointer;
-    padding: 2px 12px;
-  }
-  .nav-item.on { color: var(--accent); }
-  .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; }
-
-  /* ── NEW PACK SCREEN ── */
+  /* ── NEW PACK ── */
   #new-pack { background: var(--bg); }
-  .np-header {
-    padding: max(52px, env(safe-area-inset-top)) 20px 16px;
-    display: flex; align-items: center; gap: 12px; border-bottom: .5px solid var(--border);
-  }
-  .back-btn {
-    width: 32px; height: 32px; border-radius: 9px;
-    background: var(--bg2); border: .5px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: var(--text2); font-size: 18px; line-height: 1;
-  }
-  .np-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 600; color: var(--text); }
-
+  .np-header { padding: max(52px, env(safe-area-inset-top)) 20px 16px; display: flex; align-items: center; gap: 12px; border-bottom: .5px solid var(--border); }
+  .np-title { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600; color: var(--text); }
   .np-body { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
-
   .field-label { font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 7px; }
-  .text-input {
-    width: 100%; background: var(--bg2); border: .5px solid var(--border);
-    border-radius: 10px; padding: 12px 14px;
-    color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
-    outline: none; resize: none;
-  }
+  .text-input { width: 100%; background: var(--bg2); border: .5px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; outline: none; resize: none; }
   .text-input::placeholder { color: var(--text3); }
   .text-input:focus { border-color: var(--accent-border); }
-
-  .word-textarea {
-    min-height: 160px; line-height: 1.7;
-  }
-
+  .word-textarea { min-height: 160px; line-height: 1.7; }
   .hint-text { font-size: 11px; color: var(--text3); line-height: 1.6; }
-
-  .create-btn {
-    background: var(--accent); border: none; border-radius: 14px;
-    padding: 15px; color: #fff;
-    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600;
-    cursor: pointer; width: 100%; margin-top: auto;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .create-btn:active { opacity: .85; }
-  .create-btn:disabled { opacity: .4; cursor: not-allowed; }
-
-  .loading-state {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 16px; flex: 1; padding: 40px;
-  }
-  .spinner {
-    width: 40px; height: 40px; border-radius: 50%;
-    border: 2px solid var(--bg4); border-top-color: var(--accent);
-    animation: spin .8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .create-btn { background: var(--accent); border: none; border-radius: 14px; padding: 15px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .create-btn:disabled { opacity: .4; }
+  .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; flex: 1; padding: 40px; }
   .loading-text { font-size: 14px; color: var(--text2); text-align: center; line-height: 1.6; }
 
-  /* ── WORD CARD SCREEN ── */
+  /* ── WORD CARD ── */
   #word-card { background: var(--bg); }
-
-  .wc-header {
-    padding: max(52px, env(safe-area-inset-top)) 20px 12px;
-    display: flex; align-items: center; justify-content: space-between;
-    border-bottom: .5px solid var(--border);
-  }
+  .wc-header { padding: max(52px, env(safe-area-inset-top)) 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: .5px solid var(--border); flex-shrink: 0; }
   .wc-counter { font-size: 10px; color: var(--text3); letter-spacing: .08em; }
   .wc-pack-name { font-size: 12px; color: var(--text2); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-  /* swipe container */
-  .cards-container {
-    flex: 1; position: relative; overflow: hidden;
-    touch-action: pan-y;
-  }
-
-  .word-card-inner {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    padding: 20px 20px 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .3s;
-  }
-  .word-card-inner.slide-up { transform: translateY(-100%); opacity: 0; }
-  .word-card-inner.slide-down { transform: translateY(100%); opacity: 0; }
-  .word-card-inner.from-below { transform: translateY(100%); opacity: 0; }
-  .word-card-inner.from-above { transform: translateY(-100%); opacity: 0; }
-
-  .word-type-badge {
-    display: inline-block; background: var(--accent-bg);
-    border: .5px solid var(--accent-border);
-    color: var(--accent); font-size: 9px; padding: 3px 9px;
-    border-radius: 6px; letter-spacing: .08em; text-transform: uppercase;
-    margin-bottom: 10px; align-self: flex-start;
-  }
-
-  .big-word {
-    font-family: 'Syne', sans-serif; font-size: 38px; font-weight: 700;
-    color: var(--text); letter-spacing: -.03em; line-height: 1;
-    margin-bottom: 6px;
-  }
-
-  .ipa-row {
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 14px;
-  }
+  .cards-container { flex: 1; position: relative; overflow: hidden; touch-action: pan-y; }
+  .word-card-inner { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 20px 20px 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .word-type-badge { display: inline-block; background: var(--accent-bg); border: .5px solid var(--accent-border); color: var(--accent); font-size: 9px; padding: 3px 9px; border-radius: 6px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; align-self: flex-start; }
+  .big-word { font-family: 'DM Sans', sans-serif; font-size: 38px; font-weight: 700; color: var(--text); letter-spacing: -.03em; line-height: 1; margin-bottom: 6px; }
+  .ipa-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
   .ipa-text { font-size: 12px; color: var(--text3); }
-  .play-btn {
-    width: 26px; height: 26px; border-radius: 50%;
-    background: var(--bg3); border: .5px solid var(--border2);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: var(--accent);
-    flex-shrink: 0;
-  }
-  .play-btn svg { width: 10px; height: 10px; fill: currentColor; }
-
-  .tr-strip {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--bg2); border: .5px solid var(--border);
-    border-radius: 9px; padding: 8px 12px; margin-bottom: 14px;
-  }
-  .tr-flag { font-size: 14px; }
+  .play-btn { width: 26px; height: 26px; border-radius: 50%; background: var(--bg3); border: .5px solid var(--border2); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--accent); flex-shrink: 0; font-size: 10px; }
+  .tr-strip { display: flex; align-items: center; gap: 8px; background: var(--bg2); border: .5px solid var(--border); border-radius: 9px; padding: 8px 12px; margin-bottom: 14px; }
   .tr-val { font-size: 12px; color: var(--text2); flex: 1; }
-
-  /* meaning layers */
-  .meaning-section { margin-bottom: 8px; }
-
-  .root-block {
-    border-top: .5px solid var(--border); padding: 10px 0;
-  }
+  .root-block { border-top: .5px solid var(--border); padding: 10px 0; }
   .root-label { font-size: 9px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 5px; }
   .root-text { font-size: 12px; color: var(--text3); line-height: 1.6; }
-
-  .primary-block {
-    background: var(--bg3); border: .5px solid var(--accent-border);
-    border-radius: 12px; padding: 12px 14px; margin: 8px 0;
-  }
+  .primary-block { background: var(--bg3); border: .5px solid var(--accent-border); border-radius: 12px; padding: 12px 14px; margin: 8px 0; }
   .primary-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .primary-badge {
-    font-size: 8px; color: var(--accent); background: var(--accent-bg);
-    border: .5px solid var(--accent-border); border-radius: 4px;
-    padding: 2px 7px; letter-spacing: .08em; text-transform: uppercase;
-  }
+  .primary-badge { font-size: 8px; color: var(--accent); background: var(--accent-bg); border: .5px solid var(--accent-border); border-radius: 4px; padding: 2px 7px; letter-spacing: .08em; text-transform: uppercase; }
   .freq-track { flex: 1; height: 3px; background: var(--bg4); border-radius: 3px; }
-  .freq-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+  .freq-fill-bar { height: 100%; border-radius: 3px; background: var(--accent); }
   .freq-pct { font-size: 9px; color: var(--text3); }
   .primary-text { font-size: 13px; color: var(--text); line-height: 1.65; }
-
-  .example-block {
-    border-left: 2px solid var(--accent2); padding: 8px 10px;
-    margin-top: 10px; border-radius: 0 6px 6px 0;
-    background: rgba(139,124,246,0.06);
-  }
+  .example-block { border-left: 2px solid var(--accent2); padding: 8px 10px; margin-top: 10px; border-radius: 0 6px 6px 0; background: rgba(139,124,246,0.06); }
   .ex-en { font-size: 12px; color: #c0c0d8; line-height: 1.6; font-style: italic; }
-  .tr-toggle-btn {
-    margin-top: 6px; background: var(--bg4); border: .5px solid var(--border);
-    border-radius: 5px; padding: 3px 9px; font-size: 10px;
-    color: var(--text3); cursor: pointer; display: inline-block;
-  }
+  .tr-toggle-btn { margin-top: 6px; background: var(--bg4); border: .5px solid var(--border); border-radius: 5px; padding: 3px 9px; font-size: 10px; color: var(--text3); cursor: pointer; display: inline-block; }
   .ex-tr { font-size: 11px; color: var(--text3); margin-top: 5px; font-style: italic; display: none; }
   .ex-tr.vis { display: block; }
-
   .secondary-layer { border-top: .5px solid var(--border); padding: 9px 0; }
   .sec-row { display: flex; align-items: flex-start; gap: 8px; }
-  .sec-tag {
-    font-size: 8px; color: var(--text3); background: var(--bg3);
-    border: .5px solid var(--border); border-radius: 4px;
-    padding: 2px 6px; letter-spacing: .07em; text-transform: uppercase;
-    white-space: nowrap; margin-top: 1px; flex-shrink: 0;
-  }
-  .rare-tag {
-    font-size: 8px; color: var(--text3); border: .5px solid var(--border);
-    border-radius: 4px; padding: 2px 6px; letter-spacing: .06em;
-    text-transform: uppercase; white-space: nowrap; margin-top: 1px; flex-shrink: 0;
-    opacity: .5;
-  }
+  .sec-tag { font-size: 8px; color: var(--text3); background: var(--bg3); border: .5px solid var(--border); border-radius: 4px; padding: 2px 6px; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; margin-top: 1px; flex-shrink: 0; }
+  .rare-tag { font-size: 8px; color: var(--text3); border: .5px solid var(--border); border-radius: 4px; padding: 2px 6px; text-transform: uppercase; white-space: nowrap; margin-top: 1px; flex-shrink: 0; opacity: .5; }
   .sec-text { font-size: 12px; color: var(--text2); line-height: 1.55; flex: 1; }
-  .dim-text { color: var(--text3); font-size: 11px; }
-  .sec-tr-btn {
-    font-size: 8px; color: var(--text3); border: .5px solid var(--border);
-    background: var(--bg3); border-radius: 4px; padding: 2px 5px;
-    cursor: pointer; flex-shrink: 0; margin-top: 1px;
-  }
-  .sec-tr-val { font-size: 10px; color: var(--text3); font-style: italic; margin-top: 4px; display: none; padding-left: 0; }
+  .sec-example { border-left: 1.5px solid var(--border2); padding: 5px 8px; margin-top: 6px; font-size: 11px; color: var(--text3); font-style: italic; line-height: 1.5; }
+  .sec-tr-btn { font-size: 8px; color: var(--text3); border: .5px solid var(--border); background: var(--bg3); border-radius: 4px; padding: 2px 5px; cursor: pointer; flex-shrink: 0; margin-top: 1px; }
+  .sec-tr-val { font-size: 10px; color: var(--text3); font-style: italic; margin-top: 4px; display: none; }
   .sec-tr-val.vis { display: block; }
-
-  .swipe-hint {
-    text-align: center; font-size: 10px; color: var(--text3);
-    padding: 14px 0 max(20px, env(safe-area-inset-bottom));
-    opacity: .5;
-  }
-
-  /* nav arrows */
-  .card-nav-bar {
-    display: flex; gap: 10px; padding: 10px 20px max(16px, env(safe-area-inset-bottom));
-    border-top: .5px solid var(--border);
-  }
-  .nav-arrow {
-    flex: 1; background: var(--bg2); border: .5px solid var(--border);
-    border-radius: 12px; padding: 12px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: var(--text2); font-size: 20px;
-    user-select: none; -webkit-user-select: none;
-  }
+  .known-bar { display: flex; align-items: center; gap: 8px; padding: 10px 0; }
+  .known-badge { font-size: 11px; color: var(--green); }
+  .undo-btn { font-size: 10px; color: var(--text3); border: .5px solid var(--border); background: var(--bg3); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  .swipe-hint { text-align: center; font-size: 10px; color: var(--text3); padding: 14px 0 max(20px, env(safe-area-inset-bottom)); opacity: .4; }
+  .card-nav-bar { display: flex; gap: 10px; padding: 10px 20px max(16px, env(safe-area-inset-bottom)); border-top: .5px solid var(--border); flex-shrink: 0; }
+  .nav-arrow { flex: 1; background: var(--bg2); border: .5px solid var(--border); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); font-size: 20px; user-select: none; }
   .nav-arrow:active { background: var(--bg3); }
-  .nav-arrow.primary { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent); }
-  .know-btn {
-    flex: 2; background: var(--accent); border: none; border-radius: 12px;
-    padding: 12px; color: #fff;
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .know-btn:active { opacity: .85; }
+  .know-btn { flex: 2; background: var(--accent); border: none; border-radius: 12px; padding: 12px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .know-btn.known { background: var(--bg3); border: .5px solid var(--green); color: var(--green); }
 
-  /* ── STORY SCREEN ── */
+  /* ── STORY ── */
   #story { background: var(--bg); }
-  .story-header {
-    padding: max(52px, env(safe-area-inset-top)) 20px 14px;
-    display: flex; align-items: center; gap: 12px;
-    border-bottom: .5px solid var(--border);
-  }
-  .story-icon {
-    width: 36px; height: 36px; background: var(--accent-bg);
-    border: .5px solid var(--accent-border); border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--accent); font-size: 18px; flex-shrink: 0;
-  }
-  .story-pack-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); }
-  .story-meta { font-size: 10px; color: var(--text3); letter-spacing: .05em; margin-top: 2px; }
-
-  .story-body { flex: 1; overflow-y: auto; padding: 16px 20px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 12px; }
-
-  /* tone toggle */
-  .tone-toggle {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--bg2); border: .5px solid var(--border);
-    border-radius: 10px; padding: 10px 14px; cursor: pointer;
-  }
+  .story-header { padding: max(52px, env(safe-area-inset-top)) 20px 14px; display: flex; align-items: center; gap: 12px; border-bottom: .5px solid var(--border); flex-shrink: 0; }
+  .story-icon { width: 34px; height: 34px; background: var(--accent-bg); border: .5px solid var(--accent-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 16px; flex-shrink: 0; }
+  .story-pack-name { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); }
+  .story-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+  .story-body { flex: 1; overflow-y: auto; padding: 14px 20px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 10px; }
+  .tone-toggle { display: flex; align-items: center; justify-content: space-between; background: var(--bg2); border: .5px solid var(--border); border-radius: 10px; padding: 10px 14px; cursor: pointer; flex-shrink: 0; }
   .tone-left { display: flex; align-items: center; gap: 8px; }
   .tone-label-sm { font-size: 11px; color: var(--text2); }
-  .tone-active-chip {
-    background: var(--accent-bg); border: .5px solid var(--accent-border);
-    color: var(--accent); font-size: 11px; padding: 3px 10px; border-radius: 20px;
-  }
-  .tone-chevron { font-size: 14px; color: var(--text3); transition: transform .2s; }
+  .tone-active-chip { background: var(--accent-bg); border: .5px solid var(--accent-border); color: var(--accent); font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+  .tone-chevron { font-size: 12px; color: var(--text3); transition: transform .2s; }
   .tone-chevron.open { transform: rotate(180deg); }
-
-  .tone-drawer { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+  .tone-drawer { max-height: 0; overflow: hidden; transition: max-height .3s ease; flex-shrink: 0; }
   .tone-drawer.open { max-height: 90px; }
-  .tones-wrap { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 0 4px; }
-  .tone-chip {
-    background: var(--bg3); border: .5px solid var(--border);
-    border-radius: 20px; padding: 5px 12px; font-size: 11px;
-    color: var(--text3); cursor: pointer;
-    transition: all .15s;
-  }
+  .tones-wrap { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 0 4px; }
+  .tone-chip { background: var(--bg3); border: .5px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 11px; color: var(--text3); cursor: pointer; }
   .tone-chip.on { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent); }
-
-  /* keyword */
-  .kw-row { display: flex; align-items: center; gap: 8px; }
+  .kw-row { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .kw-label { font-size: 10px; color: var(--text3); letter-spacing: .08em; white-space: nowrap; text-transform: uppercase; }
-  .kw-input {
-    flex: 1; background: var(--bg2); border: .5px solid var(--border);
-    border-radius: 9px; padding: 10px 12px;
-    color: var(--text); font-size: 13px; outline: none;
-    font-family: 'Inter', sans-serif;
-  }
-  .kw-input::placeholder { color: var(--text3); }
+  .kw-input { flex: 1; background: var(--bg2); border: .5px solid var(--border); border-radius: 9px; padding: 10px 12px; color: var(--text); font-size: 13px; outline: none; font-family: 'Inter', sans-serif; }
   .kw-input:focus { border-color: var(--accent-border); }
-  .regen-btn {
-    width: 38px; height: 38px; border-radius: 9px;
-    background: var(--accent-bg); border: .5px solid var(--accent-border);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--accent); cursor: pointer; font-size: 16px; flex-shrink: 0;
-  }
-  .regen-btn:active { opacity: .7; }
-
-  /* story text area */
-  .story-content {
-    background: var(--bg2); border: .5px solid var(--border);
-    border-radius: 12px; padding: 16px; flex: 1; min-height: 200px;
-    position: relative;
-  }
+  .kw-input::placeholder { color: var(--text3); }
+  .regen-btn { width: 38px; height: 38px; border-radius: 9px; background: var(--accent-bg); border: .5px solid var(--accent-border); display: flex; align-items: center; justify-content: center; color: var(--accent); cursor: pointer; font-size: 16px; flex-shrink: 0; }
+  .story-content { background: var(--bg2); border: .5px solid var(--border); border-radius: 12px; padding: 16px; }
   .story-text { font-size: 13px; color: var(--text2); line-height: 2; }
   .hw { color: #b0a0f8; font-weight: 500; }
   .story-loading { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 30px 0; }
-  .story-loading .spinner { width: 28px; height: 28px; }
   .story-loading p { font-size: 12px; color: var(--text3); }
-
-  /* word chips */
-  .used-words { display: flex; flex-wrap: wrap; gap: 5px; }
+  .used-words { display: flex; flex-wrap: wrap; gap: 5px; flex-shrink: 0; }
   .w-chip { background: var(--bg3); border: .5px solid var(--border); border-radius: 6px; padding: 3px 8px; font-size: 10px; color: var(--text3); }
   .w-chip.used { border-color: rgba(139,124,246,.3); color: #7868d0; }
-
-  .listen-btn {
-    background: var(--bg3); border: .5px solid var(--accent-border);
-    border-radius: 12px; padding: 12px; color: var(--accent);
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    gap: 8px; width: 100%;
-  }
-
-  /* ── API KEY SCREEN ── */
-  #api-setup {
-    background: var(--bg);
-    display: flex; flex-direction: column;
-    padding: max(60px, env(safe-area-inset-top)) 28px max(40px, env(safe-area-inset-bottom));
-  }
-  #api-setup.active { display: flex; }
-  .api-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
-  .api-logo-mark {
-    width: 48px; height: 48px; background: var(--accent);
-    border-radius: 14px; display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-  }
-  .api-logo-mark img { width: 40px; height: 40px; object-fit: contain; filter: brightness(0) invert(1); }
-  .api-logo-text { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); }
-
-  .api-headline { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
-  .api-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 32px; }
-  .api-sub a { color: var(--accent); text-decoration: none; }
-
-  .api-field-label { font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
-  .api-input {
-    width: 100%; background: var(--bg2); border: .5px solid var(--border);
-    border-radius: 12px; padding: 14px 16px;
-    color: var(--text); font-size: 14px; outline: none;
-    font-family: 'Inter', sans-serif; letter-spacing: .02em;
-  }
-  .api-input:focus { border-color: var(--accent-border); }
-  .api-input::placeholder { color: var(--text3); }
-
-  .api-btn {
-    margin-top: 16px; background: var(--accent); border: none;
-    border-radius: 14px; padding: 16px; color: #fff;
-    font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
-    cursor: pointer; width: 100%;
-  }
-  .api-btn:active { opacity: .85; }
-
-  .api-note { font-size: 11px; color: var(--text3); margin-top: 16px; line-height: 1.7; text-align: center; }
-  .api-note a { color: var(--accent); text-decoration: none; }
+  .listen-btn { background: var(--bg3); border: .5px solid var(--accent-border); border-radius: 12px; padding: 12px; color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; flex-shrink: 0; }
+  .listen-btn:active { opacity: .8; }
 
   /* toast */
-  .toast {
-    position: fixed; bottom: max(90px, calc(env(safe-area-inset-bottom) + 80px));
-    left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--bg3); border: .5px solid var(--border2);
-    border-radius: 10px; padding: 10px 18px;
-    font-size: 13px; color: var(--text2);
-    opacity: 0; transition: all .25s; pointer-events: none;
-    white-space: nowrap; z-index: 100;
-  }
+  .toast { position: fixed; bottom: max(90px, calc(env(safe-area-inset-bottom) + 80px)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg3); border: .5px solid var(--border2); border-radius: 10px; padding: 10px 18px; font-size: 13px; color: var(--text2); opacity: 0; transition: all .25s; pointer-events: none; white-space: nowrap; z-index: 100; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* delete confirm overlay */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: flex-end; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .overlay.show { opacity: 1; pointer-events: all; }
+  .confirm-sheet { background: var(--bg2); border-radius: 20px 20px 0 0; border: .5px solid var(--border); padding: 20px; width: 100%; max-width: 500px; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
+  .confirm-title { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .confirm-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+  .confirm-btns { display: flex; gap: 10px; }
+  .confirm-cancel { flex: 1; background: var(--bg3); border: .5px solid var(--border); border-radius: 12px; padding: 13px; color: var(--text2); font-size: 14px; cursor: pointer; }
+  .confirm-delete { flex: 1; background: rgba(248,113,113,0.15); border: .5px solid rgba(248,113,113,0.3); border-radius: 12px; padding: 13px; color: var(--red); font-size: 14px; font-weight: 600; cursor: pointer; }
 </style>
 </head>
 <body>
 
-<!-- API SETUP SCREEN -->
+<!-- API SETUP -->
 <div id="api-setup" class="screen active">
   <div class="api-logo">
-    <div class="api-logo-mark">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Badger-badger.jpg/240px-Badger-badger.jpg" alt="" onerror="this.style.display='none';this.parentElement.innerHTML='🦡'">
-    </div>
+    <img class="api-logo-img" src="https://i.imgur.com/placeholder.png" onerror="this.style.display='none'" alt="">
+    <div style="font-size:28px;margin-right:4px">🦡</div>
     <div class="api-logo-text">Word Badger</div>
   </div>
-
   <div class="api-headline">Enter your<br>Anthropic API key</div>
-  <div class="api-sub">
-    Word Badger uses AI to deeply analyze vocabulary. Your key is stored only on this device.<br><br>
-    Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
-  </div>
-
+  <div class="api-sub">Word Badger uses AI to deeply analyze vocabulary. Your key is stored only on this device.<br><br>Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
   <div class="api-field-label">API Key</div>
   <input class="api-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off" autocorrect="off" spellcheck="false">
   <button class="api-btn" onclick="saveApiKey()">Start Learning →</button>
-  <div class="api-note">Your key never leaves your device. It's saved locally in your browser.</div>
+  <div class="api-note">Your key never leaves your device. Saved locally in your browser.</div>
 </div>
 
-<!-- HOME SCREEN -->
+<!-- HOME -->
 <div id="home" class="screen">
   <div class="home-header">
     <div class="logo-row">
-      <div class="logo-mark">🦡</div>
+      <div style="font-size:22px">🦡</div>
       <div class="logo-text">Word Badger</div>
     </div>
-    <div style="font-size:11px;color:var(--text3);letter-spacing:.04em" id="home-date"></div>
+    <div style="font-size:11px;color:var(--text3)" id="home-date"></div>
   </div>
-
   <div class="home-scroll" id="home-scroll">
-    <div style="height:16px"></div>
+    <div style="height:14px"></div>
     <div class="stat-row">
-      <div class="stat-box">
-        <span class="stat-num" id="stat-words">0</span>
-        <span class="stat-lbl">Words</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-num" id="stat-packs">0</span>
-        <span class="stat-lbl">Packs</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-num" id="stat-done">0</span>
-        <span class="stat-lbl">Learned</span>
-      </div>
+      <div class="stat-box"><span class="stat-num" id="stat-words">0</span><span class="stat-lbl">Words</span></div>
+      <div class="stat-box"><span class="stat-num" id="stat-packs">0</span><span class="stat-lbl">Packs</span></div>
+      <div class="stat-box"><span class="stat-num" id="stat-done">0</span><span class="stat-lbl">Learned</span></div>
     </div>
-
-    <div class="section-label">Your Study Packs</div>
+    <div class="section-label">Study Packs</div>
     <div id="pack-list"></div>
     <div style="height:8px"></div>
   </div>
-
-  <div style="padding:0 20px 8px">
-    <button class="new-btn" onclick="showScreen('new-pack')">
-      <span style="font-size:18px">+</span> New Study Pack
-    </button>
+  <div style="padding:0 20px 6px">
+    <button class="new-btn" onclick="showScreen('new-pack')"><span style="font-size:18px">+</span> New Study Pack</button>
   </div>
-
   <div class="bottom-nav">
     <div class="nav-item on">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -568,80 +277,97 @@
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
       New
     </div>
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      Stats
+    <div class="nav-item" onclick="showScreen('quick-lookup')">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Lookup
     </div>
   </div>
 </div>
 
-<!-- NEW PACK SCREEN -->
+<!-- QUICK LOOKUP -->
+<div id="quick-lookup" class="screen">
+  <div class="ql-header">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div class="back-btn" onclick="showScreen('home')">‹</div>
+      <div class="ql-title">Quick Lookup</div>
+    </div>
+    <div class="ql-sub">Type any English word — get instant deep analysis</div>
+  </div>
+  <div class="ql-body">
+    <div class="ql-input-row">
+      <input class="ql-input" id="ql-input" placeholder="e.g. nonchalant, audacity..." onkeydown="if(event.key==='Enter')lookupWord()">
+      <button class="ql-btn" onclick="lookupWord()">Analyze</button>
+    </div>
+    <div class="ql-result" id="ql-result"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="showScreen('home')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Packs
+    </div>
+    <div class="nav-item" onclick="showScreen('new-pack')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      New
+    </div>
+    <div class="nav-item on">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Lookup
+    </div>
+  </div>
+</div>
+
+<!-- NEW PACK -->
 <div id="new-pack" class="screen">
   <div class="np-header">
     <div class="back-btn" onclick="showScreen('home')">‹</div>
     <div class="np-title">New Study Pack</div>
   </div>
-
   <div class="np-body" id="np-body">
     <div>
       <div class="field-label">Pack Name (optional)</div>
-      <input class="text-input" id="pack-name-input" type="text" placeholder="e.g. Words from this week, Netflix vocab...">
+      <input class="text-input" id="pack-name-input" type="text" placeholder="e.g. Words from this week...">
     </div>
     <div>
       <div class="field-label">Paste your word list</div>
-      <textarea class="text-input word-textarea" id="word-list-input" placeholder="nonchalant&#10;audacity&#10;volatile&#10;manipulative&#10;dispassionate&#10;&#10;Paste any format — one per line, comma separated, messy notes... AI will clean it up."></textarea>
+      <textarea class="text-input word-textarea" id="word-list-input" placeholder="nonchalant&#10;audacity&#10;volatile&#10;&#10;Any format — one per line, comma separated... AI will clean it up."></textarea>
     </div>
-    <div class="hint-text">
-      Paste words in any format. The AI will automatically clean duplicates, fix formatting, and deeply analyze each word.
-    </div>
-    <button class="create-btn" id="create-btn" onclick="createPack()">
-      <span>Analyze with AI</span> <span style="font-size:16px">→</span>
-    </button>
+    <div class="hint-text">Paste words in any format. AI will clean duplicates, fix formatting, and deeply analyze each word.</div>
+    <button class="create-btn" id="create-btn" onclick="createPack()"><span>Analyze with AI</span> <span style="font-size:16px">→</span></button>
   </div>
-
-  <!-- loading state shown inside np-body -->
 </div>
 
-<!-- WORD CARD SCREEN -->
+<!-- WORD CARD -->
 <div id="word-card" class="screen">
   <div class="wc-header">
-    <div class="back-btn" onclick="exitCards()" style="width:32px;height:32px;border-radius:9px;background:var(--bg2);border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:18px">‹</div>
+    <div class="back-btn" onclick="exitCards()">‹</div>
     <div style="text-align:center">
       <div class="wc-pack-name" id="wc-pack-name">Pack</div>
       <div class="wc-counter" id="wc-counter">1 / 1</div>
     </div>
     <div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:18px" onclick="openStory()">✦</div>
   </div>
-
   <div class="cards-container" id="cards-container">
-    <div class="word-card-inner" id="card-inner">
-      <!-- populated by JS -->
-    </div>
+    <div class="word-card-inner" id="card-inner"></div>
   </div>
-
   <div class="card-nav-bar">
     <div class="nav-arrow" onclick="prevCard()">←</div>
-    <div class="know-btn" onclick="markKnown()">✓ I know this</div>
-    <div class="nav-arrow primary" onclick="nextCard()">→</div>
+    <div class="know-btn" id="know-btn" onclick="toggleKnown()">✓ I know this</div>
+    <div class="nav-arrow" style="background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)" onclick="nextCard()">→</div>
   </div>
 </div>
 
-<!-- STORY SCREEN -->
+<!-- STORY -->
 <div id="story" class="screen">
   <div class="story-header">
-    <div class="back-btn" onclick="showScreen('word-card')" style="width:32px;height:32px;border-radius:9px;background:var(--bg2);border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:18px">‹</div>
+    <div class="back-btn" onclick="showScreen('word-card')">‹</div>
     <div style="flex:1">
       <div class="story-pack-name" id="story-pack-name">Story Mode</div>
-      <div class="story-meta" id="story-meta">AI-generated immersive story</div>
+      <div class="story-sub" id="story-meta">AI-generated immersive story</div>
     </div>
   </div>
-
   <div class="story-body">
     <div class="tone-toggle" onclick="toggleToneDrawer()">
-      <div class="tone-left">
-        <span style="font-size:14px">🎭</span>
-        <span class="tone-label-sm">Tone</span>
-      </div>
+      <div class="tone-left"><span style="font-size:14px">🎭</span><span class="tone-label-sm">Tone</span></div>
       <div style="display:flex;align-items:center;gap:8px">
         <span class="tone-active-chip" id="active-tone">Dark</span>
         <span class="tone-chevron" id="tone-chev">▾</span>
@@ -660,49 +386,50 @@
         <div class="tone-chip" onclick="selectTone(this)">Motivational</div>
       </div>
     </div>
-
     <div class="kw-row">
       <span class="kw-label">Topic</span>
-      <input class="kw-input" id="story-topic" placeholder="Istanbul, chess, a breakup, space...">
+      <input class="kw-input" id="story-topic" placeholder="Istanbul, chess, a breakup...">
       <div class="regen-btn" onclick="generateStory()">↺</div>
     </div>
-
     <div class="story-content" id="story-content">
-      <div class="story-loading">
-        <div class="spinner"></div>
-        <p>Generating your story...</p>
-      </div>
+      <div class="story-loading"><div class="spinner"></div><p>Generating your story...</p></div>
     </div>
-
     <div class="used-words" id="story-word-chips"></div>
+    <button class="listen-btn" id="listen-btn" onclick="listenStory()">▶ Listen to story</button>
+  </div>
+</div>
 
-    <button class="listen-btn" onclick="listenStory()">▶ Listen (coming soon)</button>
+<!-- DELETE CONFIRM -->
+<div class="overlay" id="delete-overlay" onclick="cancelDelete()">
+  <div class="confirm-sheet" onclick="event.stopPropagation()">
+    <div class="confirm-title">Delete this pack?</div>
+    <div class="confirm-sub" id="confirm-sub">This will permanently remove the pack and all its words.</div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="cancelDelete()">Cancel</button>
+      <button class="confirm-delete" onclick="confirmDelete()">Delete</button>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──
 let API_KEY = localStorage.getItem('wb_api_key') || '';
 let packs = JSON.parse(localStorage.getItem('wb_packs') || '[]');
+let currentPackIndex = -1;
 let currentPack = null;
 let currentWordIndex = 0;
 let currentTone = 'Dark';
 let storyText = '';
+let deleteTargetIndex = -1;
+let isSpeaking = false;
 
-// ── INIT ──
 window.addEventListener('load', () => {
   document.getElementById('home-date').textContent = new Date().toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
-  if (API_KEY) {
-    showScreen('home');
-    renderHome();
-  } else {
-    showScreen('api-setup');
-  }
+  if (API_KEY) { showScreen('home'); renderHome(); }
+  else showScreen('api-setup');
 });
 
-// ── SCREENS ──
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -719,35 +446,37 @@ function saveApiKey() {
 
 // ── HOME ──
 function renderHome() {
-  const totalWords = packs.reduce((s, p) => s + (p.words ? p.words.length : 0), 0);
-  const learned = packs.reduce((s, p) => s + (p.known ? p.known.length : 0), 0);
+  const totalWords = packs.reduce((s,p) => s+(p.words?p.words.length:0), 0);
+  const learned = packs.reduce((s,p) => s+(p.known?p.known.length:0), 0);
   document.getElementById('stat-words').textContent = totalWords;
   document.getElementById('stat-packs').textContent = packs.length;
   document.getElementById('stat-done').textContent = learned;
-
   const list = document.getElementById('pack-list');
-  if (packs.length === 0) {
+  if (!packs.length) {
     list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.8">No packs yet.<br>Create your first study pack.</div>`;
     return;
   }
-  list.innerHTML = packs.slice().reverse().map((p, ri) => {
-    const i = packs.length - 1 - ri;
-    const known = p.known ? p.known.length : 0;
-    const total = p.words ? p.words.length : 0;
+  const colors = ['#8b7cf6','#f59e0b','#34d399','#f87171','#60a5fa','#f472b6','#a78bfa','#fb923c'];
+  list.innerHTML = packs.slice().reverse().map((p,ri) => {
+    const i = packs.length-1-ri;
+    const known = p.known?p.known.length:0;
+    const total = p.words?p.words.length:0;
     const pct = total ? Math.round((known/total)*100) : 0;
-    const colors = ['#8b7cf6','#f59e0b','#34d399','#f87171','#60a5fa'];
     const col = colors[i % colors.length];
-    const status = pct === 100 ? 'Completed' : pct > 0 ? `${pct}% done` : 'Not started';
+    const status = pct===100?'Completed':pct>0?`${pct}% done`:'Not started';
     const date = p.created ? new Date(p.created).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    return `<div class="pack-card" onclick="openPack(${i})">
+    return `<div class="pack-card">
       <div class="pack-accent" style="background:${col}"></div>
-      <div style="padding-left:8px">
+      <div class="pack-inner" onclick="openPack(${i})">
         <div class="pack-num">PACK ${String(i+1).padStart(2,'0')} · ${date}</div>
-        <div class="pack-name">${p.name || 'Pack ' + (i+1)}</div>
+        <div class="pack-name">${p.name||'Pack '+(i+1)}</div>
         <div class="pack-meta-row">
-          <span class="pack-words">${total} words</span>
-          <div class="pack-dot"></div>
-          <span class="pack-status">${status}</span>
+          <div class="pack-meta-left">
+            <span class="pack-words">${total} words</span>
+            <div class="pack-dot"></div>
+            <span class="pack-status">${status}</span>
+          </div>
+          <div class="pack-delete" onclick="event.stopPropagation();askDelete(${i},'${(p.name||'Pack '+(i+1)).replace(/'/g,"\\'")}')">🗑</div>
         </div>
         <div class="pack-bar"><div class="pack-fill" style="width:${pct}%;background:${col}"></div></div>
       </div>
@@ -755,64 +484,65 @@ function renderHome() {
   }).join('');
 }
 
+// ── DELETE ──
+function askDelete(index, name) {
+  deleteTargetIndex = index;
+  document.getElementById('confirm-sub').textContent = `"${name}" and all its words will be permanently removed.`;
+  document.getElementById('delete-overlay').classList.add('show');
+}
+function cancelDelete() {
+  deleteTargetIndex = -1;
+  document.getElementById('delete-overlay').classList.remove('show');
+}
+function confirmDelete() {
+  if (deleteTargetIndex < 0) return;
+  packs.splice(deleteTargetIndex, 1);
+  savePacks();
+  renderHome();
+  cancelDelete();
+  showToast('Pack deleted');
+}
+
 // ── CREATE PACK ──
 async function createPack() {
   const raw = document.getElementById('word-list-input').value.trim();
   const name = document.getElementById('pack-name-input').value.trim();
   if (!raw) { showToast('Please paste some words first'); return; }
-
   const btn = document.getElementById('create-btn');
   const body = document.getElementById('np-body');
   btn.disabled = true;
-
-  body.innerHTML = `<div class="loading-state">
-    <div class="spinner"></div>
-    <div class="loading-text">AI is analyzing your vocabulary...<br><br>This may take 30–60 seconds<br>depending on the number of words.</div>
-  </div>`;
-
+  body.innerHTML = `<div class="loading-state"><div class="spinner"></div><div class="loading-text">AI is analyzing your vocabulary...<br><br>This may take 30–60 seconds.</div></div>`;
   try {
     const words = await analyzeWords(raw);
-    const pack = {
-      id: Date.now(),
-      name: name || 'Pack ' + (packs.length + 1),
-      created: new Date().toISOString(),
-      words: words,
-      known: []
-    };
+    const pack = { id: Date.now(), name: name||'Pack '+(packs.length+1), created: new Date().toISOString(), words, known: [] };
     packs.push(pack);
     savePacks();
     renderHome();
-    openPack(packs.length - 1);
+    openPack(packs.length-1);
   } catch(e) {
-    body.innerHTML = `<div class="loading-state">
-      <div style="font-size:32px">⚠</div>
-      <div class="loading-text">Something went wrong.<br>${e.message}<br><br>Check your API key and try again.</div>
-      <button class="create-btn" onclick="showScreen('new-pack')" style="margin-top:16px">Try Again</button>
-    </div>`;
+    body.innerHTML = `<div class="loading-state"><div style="font-size:32px">⚠</div><div class="loading-text">Something went wrong.<br>${e.message}</div><button class="create-btn" onclick="location.reload()" style="margin-top:16px">Try Again</button></div>`;
   }
 }
 
 async function analyzeWords(raw) {
-  const prompt = `You are a vocabulary analysis AI for Word Badger, an advanced English vocabulary learning app for Turkish speakers.
+  const prompt = `You are a vocabulary analysis AI for Word Badger, an advanced English vocabulary app for Turkish speakers.
 
-The user has pasted a raw list of English words. Your job:
-1. Extract all unique English words/phrases (ignore duplicates, fix formatting, remove numbers/symbols)
-2. For each word, generate a complete analysis JSON
+Extract all unique English words/phrases from the input and analyze each one.
 
-Return ONLY a JSON array. No explanation, no markdown, no backticks. Just the raw JSON array.
+Return ONLY a valid JSON array. No markdown, no backticks, no explanation. Just raw JSON.
 
-Each item must follow this exact structure:
+Each item structure:
 {
   "word": "nonchalant",
   "type": "adjective",
   "ipa": "/ˌnɒn.ʃəˈlɑːnt/",
   "syllables": "non·cha·lant",
   "tr_quick": "umursamaz, kayıtsız, soğukkanlı",
-  "root": "From French 'nonchaloir' — to not be warm about. Literally: without passion or heat.",
+  "root": "From French 'nonchaloir' — to not be warm about. Literally: without passion.",
   "primary_usage": {
     "label": "MOST COMMON USE",
     "frequency": 91,
-    "text": "Acting deliberately unbothered to project confidence or coolness — even when you do care.",
+    "text": "Acting deliberately unbothered to project confidence or coolness — even when you actually do care.",
     "example_en": "She walked in late, acting completely nonchalant about it.",
     "example_tr": "Geç geldi ama hiç umursamaz bir tavırla davrandı."
   },
@@ -820,173 +550,146 @@ Each item must follow this exact structure:
     {
       "tag": "EMOTIONAL",
       "text": "Can signal genuine indifference, or emotional unavailability in close relationships.",
+      "example_en": "He was so nonchalant about their breakup that it hurt more than tears would have.",
       "tr": "İlişkilerde gerçek ilgisizliği ya da duygusal erişilemezliği gösterebilir.",
       "rare": false
     },
     {
       "tag": "LITERARY",
       "text": "In literary contexts, a nonchalant character often masks deeper internal conflict.",
+      "example_en": "The detective's nonchalant air concealed a mind working at full speed.",
       "tr": "Edebi bağlamda umursamaz karakter genellikle derin bir çatışmayı gizler.",
       "rare": true
     }
   ]
 }
 
+IMPORTANT: Every secondary item must include an "example_en" field with a natural example sentence.
+
 Raw word list:
 ${raw}
 
-Return the JSON array now. Maximum 40 words. If more are given, pick the most interesting/useful ones.`;
+Return the JSON array now. Maximum 40 words.`;
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 8000,
-      messages: [{ role: 'user', content: prompt }]
-    })
+    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 8000, messages: [{ role: 'user', content: prompt }] })
   });
-
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error?.message || 'API error ' + res.status);
-  }
-
+  if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || 'API error '+res.status); }
   const data = await res.json();
-  const text = data.content[0].text.trim();
-  const clean = text.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
-  return JSON.parse(clean);
+  const text = data.content[0].text.trim().replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+  return JSON.parse(text);
 }
 
 // ── OPEN PACK ──
 function openPack(index) {
+  currentPackIndex = index;
   currentPack = packs[index];
   currentWordIndex = 0;
   document.getElementById('wc-pack-name').textContent = currentPack.name;
-  renderCard(currentWordIndex);
+  renderCard(0);
   showScreen('word-card');
 }
 
-function exitCards() {
-  showScreen('home');
-  renderHome();
-}
+function exitCards() { showScreen('home'); renderHome(); }
 
 // ── RENDER CARD ──
-function renderCard(idx, direction) {
+function renderCard(idx) {
   if (!currentPack || !currentPack.words[idx]) return;
   const w = currentPack.words[idx];
   const total = currentPack.words.length;
   document.getElementById('wc-counter').textContent = `${idx+1} / ${total}`;
 
   const isKnown = currentPack.known && currentPack.known.includes(w.word);
-  const secondaryHTML = (w.secondary || []).map((s, si) => `
+  const knowBtn = document.getElementById('know-btn');
+  if (knowBtn) {
+    knowBtn.textContent = isKnown ? '✓ Known' : '✓ I know this';
+    knowBtn.className = isKnown ? 'know-btn known' : 'know-btn';
+  }
+
+  const secHTML = (w.secondary||[]).map((s,si) => `
     <div class="secondary-layer">
       <div class="sec-row">
         ${s.rare ? `<span class="rare-tag">${s.tag}</span>` : `<span class="sec-tag">${s.tag}</span>`}
-        <span class="sec-text ${s.rare ? 'dim-text' : ''}">${s.text}</span>
+        <span class="sec-text ${s.rare?'':''}${s.rare?'dim-text':''}">${s.text}</span>
         <span class="sec-tr-btn" onclick="toggleSecTr('str${si}')">TR</span>
       </div>
-      <div class="sec-tr-val" id="str${si}">${s.tr || ''}</div>
-    </div>
-  `).join('');
+      ${s.example_en ? `<div class="sec-example">"${s.example_en}"</div>` : ''}
+      <div class="sec-tr-val" id="str${si}">${s.tr||''}</div>
+    </div>`).join('');
 
-  const html = `
-    <span class="word-type-badge">${w.type || 'word'}</span>
+  document.getElementById('card-inner').innerHTML = `
+    <span class="word-type-badge">${w.type||'word'}</span>
     <div class="big-word">${w.word}</div>
     <div class="ipa-row">
-      <div class="play-btn" onclick="speakWord('${w.word}')">
-        <svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg>
-      </div>
-      <span class="ipa-text">${w.ipa || ''}</span>
-      <span style="color:var(--text3);font-size:11px;margin-left:4px">${w.syllables || ''}</span>
+      <div class="play-btn" onclick="speakWord('${w.word}')">▶</div>
+      <span class="ipa-text">${w.ipa||''}</span>
+      <span style="color:var(--text3);font-size:11px;margin-left:4px">${w.syllables||''}</span>
     </div>
-
     <div class="tr-strip">
-      <span class="tr-flag">🇹🇷</span>
-      <span class="tr-val">${w.tr_quick || ''}</span>
+      <span style="font-size:14px">🇹🇷</span>
+      <span class="tr-val">${w.tr_quick||''}</span>
     </div>
-
-    ${w.root ? `<div class="root-block">
-      <div class="root-label">Root & Origin</div>
-      <div class="root-text">${w.root}</div>
-    </div>` : ''}
-
+    ${w.root ? `<div class="root-block"><div class="root-label">Root & Origin</div><div class="root-text">${w.root}</div></div>` : ''}
     ${w.primary_usage ? `<div class="primary-block">
       <div class="primary-header">
-        <span class="primary-badge">${w.primary_usage.label || 'MOST COMMON'}</span>
-        <div class="freq-track"><div class="freq-fill" style="width:${w.primary_usage.frequency||80}%"></div></div>
+        <span class="primary-badge">${w.primary_usage.label||'MOST COMMON'}</span>
+        <div class="freq-track"><div class="freq-fill-bar" style="width:${w.primary_usage.frequency||80}%"></div></div>
         <span class="freq-pct">${w.primary_usage.frequency||80}%</span>
       </div>
       <div class="primary-text">${w.primary_usage.text}</div>
       ${w.primary_usage.example_en ? `<div class="example-block">
         <div class="ex-en">"${w.primary_usage.example_en}"</div>
         <span class="tr-toggle-btn" onclick="toggleExTr('ex-tr-0')">🇹🇷 TR</span>
-        <div class="ex-tr" id="ex-tr-0">${w.primary_usage.example_tr || ''}</div>
+        <div class="ex-tr" id="ex-tr-0">${w.primary_usage.example_tr||''}</div>
       </div>` : ''}
     </div>` : ''}
-
-    ${secondaryHTML}
-
-    ${isKnown ? '<div style="text-align:center;padding:10px 0;font-size:11px;color:var(--green)">✓ Marked as known</div>' : ''}
+    ${secHTML}
+    ${isKnown ? `<div class="known-bar"><span class="known-badge">✓ Marked as known</span><span class="undo-btn" onclick="undoKnown()">Undo</span></div>` : ''}
     <div class="swipe-hint">← prev · → next · ✦ story</div>
   `;
-
-  const inner = document.getElementById('card-inner');
-  inner.innerHTML = html;
-  inner.scrollTop = 0;
+  document.getElementById('card-inner').scrollTop = 0;
 }
 
-function toggleExTr(id) {
-  const el = document.getElementById(id);
-  if(el) el.classList.toggle('vis');
-}
-function toggleSecTr(id) {
-  const el = document.getElementById(id);
-  if(el) el.classList.toggle('vis');
-}
+function toggleExTr(id) { document.getElementById(id)?.classList.toggle('vis'); }
+function toggleSecTr(id) { document.getElementById(id)?.classList.toggle('vis'); }
 
-function nextCard() {
-  if (!currentPack) return;
-  if (currentWordIndex < currentPack.words.length - 1) {
-    currentWordIndex++;
-    renderCard(currentWordIndex, 'next');
-  } else {
-    showToast('Last word! Tap ✦ for Story Mode');
-  }
-}
-
-function prevCard() {
-  if (currentWordIndex > 0) {
-    currentWordIndex--;
-    renderCard(currentWordIndex, 'prev');
-  }
-}
-
-function markKnown() {
+function toggleKnown() {
   if (!currentPack || !currentPack.words[currentWordIndex]) return;
   const w = currentPack.words[currentWordIndex].word;
   if (!currentPack.known) currentPack.known = [];
-  if (!currentPack.known.includes(w)) {
+  if (currentPack.known.includes(w)) {
+    currentPack.known = currentPack.known.filter(x => x !== w);
+    showToast('Removed from known');
+  } else {
     currentPack.known.push(w);
-    savePacks();
     showToast('Marked as known ✓');
-    renderCard(currentWordIndex);
+    setTimeout(() => nextCard(), 400);
   }
-  nextCard();
+  savePacks();
+  renderCard(currentWordIndex);
+}
+
+function undoKnown() {
+  if (!currentPack || !currentPack.words[currentWordIndex]) return;
+  const w = currentPack.words[currentWordIndex].word;
+  currentPack.known = (currentPack.known||[]).filter(x => x !== w);
+  savePacks();
+  renderCard(currentWordIndex);
+  showToast('Removed from known');
+}
+
+function nextCard() {
+  if (currentWordIndex < (currentPack?.words?.length||1)-1) { currentWordIndex++; renderCard(currentWordIndex); }
+  else showToast('Last word! Tap ✦ for Story Mode');
+}
+function prevCard() {
+  if (currentWordIndex > 0) { currentWordIndex--; renderCard(currentWordIndex); }
 }
 
 function speakWord(word) {
-  if ('speechSynthesis' in window) {
-    const u = new SpeechSynthesisUtterance(word);
-    u.lang = 'en-US'; u.rate = 0.9;
-    window.speechSynthesis.speak(u);
-  }
+  if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(word); u.lang='en-US'; u.rate=0.85; window.speechSynthesis.speak(u); }
 }
 
 // ── STORY ──
@@ -1000,20 +703,15 @@ function openStory() {
 }
 
 function renderWordChips() {
-  const chips = document.getElementById('story-word-chips');
-  if (!currentPack) return;
-  chips.innerHTML = (currentPack.words || []).slice(0, 12).map(w =>
-    `<div class="w-chip">${w.word}</div>`
-  ).join('');
+  document.getElementById('story-word-chips').innerHTML = (currentPack?.words||[]).slice(0,14).map(w => `<div class="w-chip">${w.word}</div>`).join('');
 }
 
-let toneDrawerOpen = false;
+let toneOpen = false;
 function toggleToneDrawer() {
-  toneDrawerOpen = !toneDrawerOpen;
-  document.getElementById('tone-drawer').classList.toggle('open', toneDrawerOpen);
-  document.getElementById('tone-chev').classList.toggle('open', toneDrawerOpen);
+  toneOpen = !toneOpen;
+  document.getElementById('tone-drawer').classList.toggle('open', toneOpen);
+  document.getElementById('tone-chev').classList.toggle('open', toneOpen);
 }
-
 function selectTone(el) {
   document.querySelectorAll('.tone-chip').forEach(t => t.classList.remove('on'));
   el.classList.add('on');
@@ -1023,81 +721,126 @@ function selectTone(el) {
 }
 
 async function generateStory() {
-  if (!currentPack || !currentPack.words) return;
+  if (!currentPack?.words) return;
   const topic = document.getElementById('story-topic').value.trim();
   const words = currentPack.words.map(w => w.word).join(', ');
-  const content = document.getElementById('story-content');
+  document.getElementById('story-content').innerHTML = `<div class="story-loading"><div class="spinner"></div><p>Writing your story...</p></div>`;
+  document.getElementById('story-word-chips').innerHTML = (currentPack.words||[]).slice(0,14).map(w=>`<div class="w-chip">${w.word}</div>`).join('');
 
-  content.innerHTML = `<div class="story-loading"><div class="spinner"></div><p>Writing your story...</p></div>`;
-
-  const topicLine = topic ? `The story must be set in or around the theme of: "${topic}".` : '';
-  const prompt = `Write a ${currentTone.toLowerCase()} immersive short story (300-400 words) for an English vocabulary learner.
-
+  const topicLine = topic ? `The story must be centered around the theme or setting of: "${topic}".` : '';
+  const prompt = `Write a ${currentTone.toLowerCase()} immersive short story (350-450 words) for an English vocabulary learner.
 Rules:
 - Naturally use ALL of these words at least once, most at least twice: ${words}
-- The story should make the meaning of each word feel obvious from context
-- Make it emotionally engaging and human — NOT like a textbook
+- Make the meaning of each word feel clear from context
+- Emotionally engaging, modern, human — NOT textbook-like
 - ${topicLine}
-- Bold the vocabulary words by wrapping them in <b> tags
-- Write in fluent, modern American English
-- No chapter titles, no preamble, just the story
+- Wrap vocabulary words in <b> tags
+- Fluent modern American English
+- No titles, no preamble — just the story directly
 
 Story:`;
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1200, messages: [{ role:'user', content: prompt }] })
     });
     const data = await res.json();
     storyText = data.content[0].text;
-    const styledText = storyText.replace(/<b>(.*?)<\/b>/g, '<span class="hw">$1</span>');
-    content.innerHTML = `<div class="story-text">${styledText.replace(/\n\n/g,'<br><br>')}</div>`;
-
+    const styled = storyText.replace(/<b>(.*?)<\/b>/g, '<span class="hw">$1</span>');
+    document.getElementById('story-content').innerHTML = `<div class="story-text">${styled.replace(/\n\n/g,'<br><br>')}</div>`;
     // update chips
-    const chips = document.getElementById('story-word-chips');
-    const usedWords = (currentPack.words||[]).filter(w => storyText.toLowerCase().includes(w.word.toLowerCase()));
-    chips.innerHTML = (currentPack.words||[]).slice(0,12).map(w => {
+    document.getElementById('story-word-chips').innerHTML = (currentPack.words||[]).slice(0,14).map(w => {
       const used = storyText.toLowerCase().includes(w.word.toLowerCase());
       return `<div class="w-chip ${used?'used':''}">${w.word}</div>`;
     }).join('');
   } catch(e) {
-    content.innerHTML = `<div class="story-loading"><p style="color:var(--text3)">Error generating story.<br>${e.message}</p></div>`;
+    document.getElementById('story-content').innerHTML = `<div class="story-loading"><p style="color:var(--text3)">Error: ${e.message}</p></div>`;
   }
 }
 
 function listenStory() {
-  if (!storyText) return;
+  if (!storyText) { showToast('Generate a story first'); return; }
+  if (isSpeaking) {
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    document.getElementById('listen-btn').textContent = '▶ Listen to story';
+    return;
+  }
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const clean = storyText.replace(/<[^>]*>/g,'');
     const u = new SpeechSynthesisUtterance(clean);
     u.lang = 'en-US'; u.rate = 0.88;
+    u.onstart = () => { isSpeaking = true; document.getElementById('listen-btn').textContent = '⏹ Stop listening'; };
+    u.onend = () => { isSpeaking = false; document.getElementById('listen-btn').textContent = '▶ Listen to story'; };
     window.speechSynthesis.speak(u);
-    showToast('Playing story audio...');
+  }
+}
+
+// ── QUICK LOOKUP ──
+async function lookupWord() {
+  const word = document.getElementById('ql-input').value.trim();
+  if (!word) return;
+  const result = document.getElementById('ql-result');
+  result.className = 'ql-result vis';
+  result.innerHTML = `<div class="ql-loading"><div class="spinner" style="width:24px;height:24px"></div><p>Analyzing "${word}"...</p></div>`;
+
+  const prompt = `Analyze this English word for a Turkish speaker: "${word}"
+Return ONLY valid JSON, no markdown:
+{
+  "word": "${word}",
+  "type": "part of speech",
+  "ipa": "/pronunciation/",
+  "tr_quick": "Turkish meaning",
+  "most_common": "What this word most commonly means in real everyday usage by native speakers (2-3 sentences)",
+  "example": "A natural example sentence using the word",
+  "nuance": "Key nuance, tone, or cultural context native speakers understand about this word"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 600, messages: [{ role:'user', content: prompt }] })
+    });
+    const data = await res.json();
+    const text = data.content[0].text.trim().replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    const w = JSON.parse(text);
+    result.innerHTML = `
+      <div>
+        <div class="ql-word">${w.word}</div>
+        <div class="ql-ipa">
+          <div class="ql-play" onclick="speakWord('${w.word}')">▶</div>
+          <span>${w.ipa||''}</span>
+          <span style="margin-left:6px;background:var(--accent-bg);border:.5px solid var(--accent-border);color:var(--accent);font-size:9px;padding:2px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.06em">${w.type||''}</span>
+        </div>
+      </div>
+      <div class="ql-tr">🇹🇷 ${w.tr_quick||''}</div>
+      <div class="ql-section">
+        <div class="ql-section-label">Most Common Use</div>
+        <div class="ql-section-text">${w.most_common||''}</div>
+        ${w.example ? `<div class="ql-example">"${w.example}"</div>` : ''}
+      </div>
+      ${w.nuance ? `<div class="ql-section">
+        <div class="ql-section-label">Native Nuance</div>
+        <div class="ql-section-text">${w.nuance}</div>
+      </div>` : ''}
+    `;
+  } catch(e) {
+    result.innerHTML = `<p style="color:var(--text3);font-size:13px">Error: ${e.message}</p>`;
   }
 }
 
 // ── UTILS ──
 function savePacks() { localStorage.setItem('wb_packs', JSON.stringify(packs)); }
-
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// swipe gesture
 let touchStartY = 0;
 document.getElementById('cards-container').addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, {passive:true});
 document.getElementById('cards-container').addEventListener('touchend', e => {
