@@ -9,247 +9,265 @@
 <meta name="theme-color" content="#0a0a0c">
 <title>Word Badger</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@300;400;500&display=swap');
 
-  :root {
-    --bg: #0a0a0c;
-    --bg2: #111116;
-    --bg3: #17171e;
-    --bg4: #1c1c26;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #f0f0f4;
-    --text2: #8888a0;
-    --text3: #44445a;
-    --accent: #8b7cf6;
-    --accent2: #6b5cd6;
-    --accent-bg: rgba(139,124,246,0.12);
-    --accent-border: rgba(139,124,246,0.3);
-    --green: #4ade80;
-    --red: #f87171;
-  }
+:root {
+  --bg:#0a0a0c; --bg2:#111116; --bg3:#17171e; --bg4:#1c1c26;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#f0f0f4; --text2:#8888a0; --text3:#44445a;
+  --accent:#8b7cf6; --accent2:#6b5cd6;
+  --accent-bg:rgba(139,124,246,0.1); --accent-border:rgba(139,124,246,0.28);
+  --green:#4ade80; --red:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow:hidden;position:fixed}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; width: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; position: fixed; }
+/* SCREENS */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .22s ease;overflow:hidden}
+.screen.active{opacity:1;pointer-events:all}
 
-  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity .25s ease; overflow: hidden; }
-  .screen.active { opacity: 1; pointer-events: all; }
+/* SHARED */
+.dm{font-family:'DM Sans',sans-serif}
+.back-btn{width:32px;height:32px;border-radius:9px;background:var(--bg2);border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:19px;line-height:1;flex-shrink:0}
+.bottom-nav{display:flex;justify-content:space-around;padding:10px 0 max(16px,env(safe-area-inset-bottom));border-top:.5px solid var(--border);background:var(--bg);flex-shrink:0}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text3);font-size:10px;cursor:pointer;padding:2px 14px;letter-spacing:.03em}
+.nav-item.on{color:var(--accent)}
+.nav-item svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.5}
+.sec-label{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.spinner{width:34px;height:34px;border-radius:50%;border:2px solid var(--bg4);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.badge{display:inline-block;font-size:8.5px;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:5px;border:.5px solid}
 
-  /* ── SHARED ── */
-  .font-display { font-family: 'DM Sans', sans-serif; }
-  .back-btn { width: 32px; height: 32px; border-radius: 9px; background: var(--bg2); border: .5px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); font-size: 18px; line-height: 1; flex-shrink: 0; }
-  .bottom-nav { display: flex; justify-content: space-around; padding: 10px 0 max(16px, env(safe-area-inset-bottom)); border-top: .5px solid var(--border); background: var(--bg); flex-shrink: 0; }
-  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text3); font-size: 10px; cursor: pointer; padding: 2px 12px; }
-  .nav-item.on { color: var(--accent); }
-  .nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.5; }
-  .section-label { font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; }
-  .spinner { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--bg4); border-top-color: var(--accent); animation: spin .8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* TR TOGGLE — inline sentence translation */
+.tr-pill{display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border:.5px solid var(--border);border-radius:6px;padding:2px 8px;font-size:10px;color:var(--text3);cursor:pointer;margin-top:5px;user-select:none}
+.tr-pill:active{opacity:.7}
+.tr-reveal{font-size:11px;color:var(--text3);font-style:italic;margin-top:4px;padding:5px 8px;background:var(--bg3);border-radius:6px;border-left:2px solid var(--accent2);display:none;line-height:1.55}
+.tr-reveal.vis{display:block}
 
-  /* ── API SETUP ── */
-  #api-setup { background: var(--bg); display: flex; flex-direction: column; padding: max(60px, env(safe-area-inset-top)) 28px max(40px, env(safe-area-inset-bottom)); }
-  #api-setup.active { display: flex; }
-  .api-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
-  .api-logo-img { width: 52px; height: 52px; object-fit: contain; }
-  .api-logo-text { font-family: 'DM Sans', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); }
-  .api-headline { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
-  .api-sub { font-size: 14px; color: var(--text2); line-height: 1.7; margin-bottom: 32px; }
-  .api-sub a { color: var(--accent); text-decoration: none; }
-  .api-field-label { font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
-  .api-input { width: 100%; background: var(--bg2); border: .5px solid var(--border); border-radius: 12px; padding: 14px 16px; color: var(--text); font-size: 14px; outline: none; font-family: 'Inter', sans-serif; }
-  .api-input:focus { border-color: var(--accent-border); }
-  .api-input::placeholder { color: var(--text3); }
-  .api-btn { margin-top: 16px; background: var(--accent); border: none; border-radius: 14px; padding: 16px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; }
-  .api-note { font-size: 11px; color: var(--text3); margin-top: 16px; line-height: 1.7; text-align: center; }
+/* TOAST */
+.toast{position:fixed;bottom:max(88px,calc(env(safe-area-inset-bottom)+76px));left:50%;transform:translateX(-50%) translateY(16px);background:var(--bg3);border:.5px solid var(--border2);border-radius:10px;padding:10px 18px;font-size:13px;color:var(--text2);opacity:0;transition:all .22s;pointer-events:none;white-space:nowrap;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  /* ── HOME ── */
-  #home { background: var(--bg); }
-  .home-header { padding: max(52px, env(safe-area-inset-top)) 20px 0; display: flex; justify-content: space-between; align-items: center; }
-  .logo-row { display: flex; align-items: center; gap: 10px; }
-  .logo-img { width: 30px; height: 30px; object-fit: contain; }
-  .logo-text { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
-  .home-scroll { flex: 1; overflow-y: auto; padding: 16px 20px 0; -webkit-overflow-scrolling: touch; }
-  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px; }
-  .stat-box { background: var(--bg2); border: .5px solid var(--border); border-radius: 12px; padding: 12px 10px; text-align: center; }
-  .stat-num { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); display: block; line-height: 1; }
-  .stat-lbl { font-size: 9px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; margin-top: 4px; display: block; }
-  .pack-card { background: var(--bg2); border: .5px solid var(--border); border-radius: 14px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; position: relative; overflow: hidden; }
-  .pack-card:active { background: var(--bg3); }
-  .pack-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
-  .pack-inner { padding-left: 8px; }
-  .pack-num { font-size: 9px; color: var(--text3); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
-  .pack-name { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-  .pack-meta-row { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
-  .pack-meta-left { display: flex; align-items: center; gap: 8px; }
-  .pack-words { font-size: 11px; color: var(--text2); }
-  .pack-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--text3); }
-  .pack-status { font-size: 11px; color: var(--text3); }
-  .pack-delete { width: 28px; height: 28px; border-radius: 7px; background: rgba(248,113,113,0.1); border: .5px solid rgba(248,113,113,0.2); display: flex; align-items: center; justify-content: center; color: var(--red); font-size: 14px; cursor: pointer; flex-shrink: 0; }
-  .pack-bar { height: 2px; background: var(--bg4); border-radius: 2px; margin-top: 10px; }
-  .pack-fill { height: 100%; border-radius: 2px; background: var(--accent); }
-  .new-btn { margin: 10px 0 6px; background: var(--accent); border: none; border-radius: 14px; padding: 14px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
-  .new-btn:active { opacity: .85; }
+/* DELETE SHEET */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:flex-end;justify-content:center;z-index:500;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.show{opacity:1;pointer-events:all}
+.sheet{background:var(--bg2);border-radius:20px 20px 0 0;border:.5px solid var(--border);padding:22px 20px max(28px,env(safe-area-inset-bottom));width:100%;max-width:500px}
+.sheet-title{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:5px}
+.sheet-sub{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5}
+.sheet-btns{display:flex;gap:10px}
+.btn-cancel{flex:1;background:var(--bg3);border:.5px solid var(--border);border-radius:12px;padding:13px;color:var(--text2);font-size:14px;cursor:pointer}
+.btn-del{flex:1;background:rgba(248,113,113,0.12);border:.5px solid rgba(248,113,113,0.3);border-radius:12px;padding:13px;color:var(--red);font-size:14px;font-weight:600;cursor:pointer}
 
-  /* ── QUICK LOOKUP ── */
-  #quick-lookup { background: var(--bg); }
-  .ql-header { padding: max(52px, env(safe-area-inset-top)) 20px 16px; border-bottom: .5px solid var(--border); }
-  .ql-title { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .ql-sub { font-size: 12px; color: var(--text3); }
-  .ql-body { flex: 1; overflow-y: auto; padding: 16px 20px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 12px; }
-  .ql-input-row { display: flex; gap: 8px; }
-  .ql-input { flex: 1; background: var(--bg2); border: .5px solid var(--border); border-radius: 12px; padding: 13px 16px; color: var(--text); font-size: 16px; outline: none; font-family: 'Inter', sans-serif; }
-  .ql-input:focus { border-color: var(--accent-border); }
-  .ql-input::placeholder { color: var(--text3); }
-  .ql-btn { background: var(--accent); border: none; border-radius: 12px; padding: 13px 18px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
-  .ql-result { background: var(--bg2); border: .5px solid var(--border); border-radius: 14px; padding: 16px; display: none; flex-direction: column; gap: 12px; }
-  .ql-result.vis { display: flex; }
-  .ql-word { font-family: 'DM Sans', sans-serif; font-size: 30px; font-weight: 700; color: var(--text); letter-spacing: -.02em; }
-  .ql-ipa { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 8px; margin-top: 2px; }
-  .ql-play { width: 24px; height: 24px; border-radius: 50%; background: var(--bg3); border: .5px solid var(--border2); display: flex; align-items: center; justify-content: center; color: var(--accent); cursor: pointer; font-size: 9px; }
-  .ql-tr { background: var(--bg3); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text2); }
-  .ql-section { border-top: .5px solid var(--border); padding-top: 10px; }
-  .ql-section-label { font-size: 9px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
-  .ql-section-text { font-size: 13px; color: var(--text); line-height: 1.65; }
-  .ql-example { border-left: 2px solid var(--accent2); padding: 7px 10px; background: rgba(139,124,246,0.06); border-radius: 0 6px 6px 0; font-size: 12px; color: #c0c0d8; font-style: italic; line-height: 1.6; margin-top: 8px; }
-  .ql-loading { display: flex; align-items: center; gap: 12px; padding: 20px 0; }
-  .ql-loading p { font-size: 13px; color: var(--text3); }
+/* ─── API SETUP ─── */
+#api-setup{background:var(--bg);display:flex;flex-direction:column;padding:max(64px,env(safe-area-inset-top)) 28px max(40px,env(safe-area-inset-bottom))}
+.setup-logo{display:flex;align-items:center;gap:12px;margin-bottom:34px}
+.setup-logo-icon{font-size:34px}
+.setup-logo-text{font-family:'DM Sans',sans-serif;font-size:26px;font-weight:700;color:var(--text)}
+.setup-headline{font-family:'DM Sans',sans-serif;font-size:22px;font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.3}
+.setup-sub{font-size:14px;color:var(--text2);line-height:1.75;margin-bottom:32px}
+.setup-sub a{color:var(--accent);text-decoration:none}
+.setup-lbl{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.setup-input{width:100%;background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--text);font-size:14px;outline:none;font-family:'Inter',sans-serif}
+.setup-input:focus{border-color:var(--accent-border)}
+.setup-input::placeholder{color:var(--text3)}
+.setup-btn{margin-top:16px;background:var(--accent);border:none;border-radius:14px;padding:16px;color:#fff;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;width:100%}
+.setup-note{font-size:11px;color:var(--text3);margin-top:14px;line-height:1.7;text-align:center}
 
-  /* ── NEW PACK ── */
-  #new-pack { background: var(--bg); }
-  .np-header { padding: max(52px, env(safe-area-inset-top)) 20px 16px; display: flex; align-items: center; gap: 12px; border-bottom: .5px solid var(--border); }
-  .np-title { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 600; color: var(--text); }
-  .np-body { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
-  .field-label { font-size: 10px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 7px; }
-  .text-input { width: 100%; background: var(--bg2); border: .5px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; outline: none; resize: none; }
-  .text-input::placeholder { color: var(--text3); }
-  .text-input:focus { border-color: var(--accent-border); }
-  .word-textarea { min-height: 160px; line-height: 1.7; }
-  .hint-text { font-size: 11px; color: var(--text3); line-height: 1.6; }
-  .create-btn { background: var(--accent); border: none; border-radius: 14px; padding: 15px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .create-btn:disabled { opacity: .4; }
-  .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; flex: 1; padding: 40px; }
-  .loading-text { font-size: 14px; color: var(--text2); text-align: center; line-height: 1.6; }
+/* ─── HOME ─── */
+#home{background:var(--bg)}
+.home-header{padding:max(52px,env(safe-area-inset-top)) 20px 0;display:flex;justify-content:space-between;align-items:center}
+.logo-row{display:flex;align-items:center;gap:9px}
+.logo-icon{font-size:20px}
+.logo-text{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.01em}
+.home-scroll{flex:1;overflow-y:auto;padding:14px 20px 0;-webkit-overflow-scrolling:touch}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:22px}
+.stat-box{background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:12px 10px;text-align:center}
+.stat-num{font-family:'DM Sans',sans-serif;font-size:22px;font-weight:700;color:var(--text);display:block;line-height:1}
+.stat-lbl{font-size:9px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;display:block}
 
-  /* ── WORD CARD ── */
-  #word-card { background: var(--bg); }
-  .wc-header { padding: max(52px, env(safe-area-inset-top)) 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: .5px solid var(--border); flex-shrink: 0; }
-  .wc-counter { font-size: 10px; color: var(--text3); letter-spacing: .08em; }
-  .wc-pack-name { font-size: 12px; color: var(--text2); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .cards-container { flex: 1; position: relative; overflow: hidden; touch-action: pan-y; }
-  .word-card-inner { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 20px 20px 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .word-type-badge { display: inline-block; background: var(--accent-bg); border: .5px solid var(--accent-border); color: var(--accent); font-size: 9px; padding: 3px 9px; border-radius: 6px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; align-self: flex-start; }
-  .big-word { font-family: 'DM Sans', sans-serif; font-size: 38px; font-weight: 700; color: var(--text); letter-spacing: -.03em; line-height: 1; margin-bottom: 6px; }
-  .ipa-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-  .ipa-text { font-size: 12px; color: var(--text3); }
-  .play-btn { width: 26px; height: 26px; border-radius: 50%; background: var(--bg3); border: .5px solid var(--border2); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--accent); flex-shrink: 0; font-size: 10px; }
-  .tr-strip { display: flex; align-items: center; gap: 8px; background: var(--bg2); border: .5px solid var(--border); border-radius: 9px; padding: 8px 12px; margin-bottom: 14px; }
-  .tr-val { font-size: 12px; color: var(--text2); flex: 1; }
-  .root-block { border-top: .5px solid var(--border); padding: 10px 0; }
-  .root-label { font-size: 9px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 5px; }
-  .root-text { font-size: 12px; color: var(--text3); line-height: 1.6; }
-  .primary-block { background: var(--bg3); border: .5px solid var(--accent-border); border-radius: 12px; padding: 12px 14px; margin: 8px 0; }
-  .primary-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .primary-badge { font-size: 8px; color: var(--accent); background: var(--accent-bg); border: .5px solid var(--accent-border); border-radius: 4px; padding: 2px 7px; letter-spacing: .08em; text-transform: uppercase; }
-  .freq-track { flex: 1; height: 3px; background: var(--bg4); border-radius: 3px; }
-  .freq-fill-bar { height: 100%; border-radius: 3px; background: var(--accent); }
-  .freq-pct { font-size: 9px; color: var(--text3); }
-  .primary-text { font-size: 13px; color: var(--text); line-height: 1.65; }
-  .example-block { border-left: 2px solid var(--accent2); padding: 8px 10px; margin-top: 10px; border-radius: 0 6px 6px 0; background: rgba(139,124,246,0.06); }
-  .ex-en { font-size: 12px; color: #c0c0d8; line-height: 1.6; font-style: italic; }
-  .tr-toggle-btn { margin-top: 6px; background: var(--bg4); border: .5px solid var(--border); border-radius: 5px; padding: 3px 9px; font-size: 10px; color: var(--text3); cursor: pointer; display: inline-block; }
-  .ex-tr { font-size: 11px; color: var(--text3); margin-top: 5px; font-style: italic; display: none; }
-  .ex-tr.vis { display: block; }
-  .secondary-layer { border-top: .5px solid var(--border); padding: 9px 0; }
-  .sec-row { display: flex; align-items: flex-start; gap: 8px; }
-  .sec-tag { font-size: 8px; color: var(--text3); background: var(--bg3); border: .5px solid var(--border); border-radius: 4px; padding: 2px 6px; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; margin-top: 1px; flex-shrink: 0; }
-  .rare-tag { font-size: 8px; color: var(--text3); border: .5px solid var(--border); border-radius: 4px; padding: 2px 6px; text-transform: uppercase; white-space: nowrap; margin-top: 1px; flex-shrink: 0; opacity: .5; }
-  .sec-text { font-size: 12px; color: var(--text2); line-height: 1.55; flex: 1; }
-  .sec-example { border-left: 1.5px solid var(--border2); padding: 5px 8px; margin-top: 6px; font-size: 11px; color: var(--text3); font-style: italic; line-height: 1.5; }
-  .sec-tr-btn { font-size: 8px; color: var(--text3); border: .5px solid var(--border); background: var(--bg3); border-radius: 4px; padding: 2px 5px; cursor: pointer; flex-shrink: 0; margin-top: 1px; }
-  .sec-tr-val { font-size: 10px; color: var(--text3); font-style: italic; margin-top: 4px; display: none; }
-  .sec-tr-val.vis { display: block; }
-  .known-bar { display: flex; align-items: center; gap: 8px; padding: 10px 0; }
-  .known-badge { font-size: 11px; color: var(--green); }
-  .undo-btn { font-size: 10px; color: var(--text3); border: .5px solid var(--border); background: var(--bg3); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
-  .swipe-hint { text-align: center; font-size: 10px; color: var(--text3); padding: 14px 0 max(20px, env(safe-area-inset-bottom)); opacity: .4; }
-  .card-nav-bar { display: flex; gap: 10px; padding: 10px 20px max(16px, env(safe-area-inset-bottom)); border-top: .5px solid var(--border); flex-shrink: 0; }
-  .nav-arrow { flex: 1; background: var(--bg2); border: .5px solid var(--border); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); font-size: 20px; user-select: none; }
-  .nav-arrow:active { background: var(--bg3); }
-  .know-btn { flex: 2; background: var(--accent); border: none; border-radius: 12px; padding: 12px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .know-btn.known { background: var(--bg3); border: .5px solid var(--green); color: var(--green); }
+/* SWIPE-TO-DELETE pack card */
+.pack-wrap{position:relative;margin-bottom:8px;border-radius:14px;overflow:hidden}
+.pack-delete-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:rgba(248,113,113,0.15);display:flex;align-items:center;justify-content:center;color:var(--red);font-size:12px;font-weight:600;letter-spacing:.04em;border-radius:0 14px 14px 0}
+.pack-card{background:var(--bg2);border:.5px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;position:relative;overflow:hidden;transition:transform .25s cubic-bezier(.4,0,.2,1);will-change:transform;touch-action:pan-y}
+.pack-card:active{opacity:.92}
+.pack-accent{position:absolute;left:0;top:0;bottom:0;width:3px}
+.pack-inner{padding-left:8px}
+.pack-num{font-size:9px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.pack-name{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+.pack-meta{display:flex;align-items:center;gap:8px}
+.pack-words{font-size:11px;color:var(--text2)}
+.pack-dot{width:3px;height:3px;border-radius:50%;background:var(--text3)}
+.pack-status{font-size:11px;color:var(--text3)}
+.pack-bar{height:2px;background:var(--bg4);border-radius:2px;margin-top:10px}
+.pack-fill{height:100%;border-radius:2px}
+.new-btn{margin:8px 0 6px;background:var(--accent);border:none;border-radius:14px;padding:14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.new-btn:active{opacity:.85;transform:scale(.98)}
 
-  /* ── STORY ── */
-  #story { background: var(--bg); }
-  .story-header { padding: max(52px, env(safe-area-inset-top)) 20px 14px; display: flex; align-items: center; gap: 12px; border-bottom: .5px solid var(--border); flex-shrink: 0; }
-  .story-icon { width: 34px; height: 34px; background: var(--accent-bg); border: .5px solid var(--accent-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 16px; flex-shrink: 0; }
-  .story-pack-name { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); }
-  .story-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
-  .story-body { flex: 1; overflow-y: auto; padding: 14px 20px; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 10px; }
-  .tone-toggle { display: flex; align-items: center; justify-content: space-between; background: var(--bg2); border: .5px solid var(--border); border-radius: 10px; padding: 10px 14px; cursor: pointer; flex-shrink: 0; }
-  .tone-left { display: flex; align-items: center; gap: 8px; }
-  .tone-label-sm { font-size: 11px; color: var(--text2); }
-  .tone-active-chip { background: var(--accent-bg); border: .5px solid var(--accent-border); color: var(--accent); font-size: 11px; padding: 3px 10px; border-radius: 20px; }
-  .tone-chevron { font-size: 12px; color: var(--text3); transition: transform .2s; }
-  .tone-chevron.open { transform: rotate(180deg); }
-  .tone-drawer { max-height: 0; overflow: hidden; transition: max-height .3s ease; flex-shrink: 0; }
-  .tone-drawer.open { max-height: 90px; }
-  .tones-wrap { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 0 4px; }
-  .tone-chip { background: var(--bg3); border: .5px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 11px; color: var(--text3); cursor: pointer; }
-  .tone-chip.on { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent); }
-  .kw-row { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .kw-label { font-size: 10px; color: var(--text3); letter-spacing: .08em; white-space: nowrap; text-transform: uppercase; }
-  .kw-input { flex: 1; background: var(--bg2); border: .5px solid var(--border); border-radius: 9px; padding: 10px 12px; color: var(--text); font-size: 13px; outline: none; font-family: 'Inter', sans-serif; }
-  .kw-input:focus { border-color: var(--accent-border); }
-  .kw-input::placeholder { color: var(--text3); }
-  .regen-btn { width: 38px; height: 38px; border-radius: 9px; background: var(--accent-bg); border: .5px solid var(--accent-border); display: flex; align-items: center; justify-content: center; color: var(--accent); cursor: pointer; font-size: 16px; flex-shrink: 0; }
-  .story-content { background: var(--bg2); border: .5px solid var(--border); border-radius: 12px; padding: 16px; }
-  .story-text { font-size: 13px; color: var(--text2); line-height: 2; }
-  .hw { color: #b0a0f8; font-weight: 500; }
-  .story-loading { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 30px 0; }
-  .story-loading p { font-size: 12px; color: var(--text3); }
-  .used-words { display: flex; flex-wrap: wrap; gap: 5px; flex-shrink: 0; }
-  .w-chip { background: var(--bg3); border: .5px solid var(--border); border-radius: 6px; padding: 3px 8px; font-size: 10px; color: var(--text3); }
-  .w-chip.used { border-color: rgba(139,124,246,.3); color: #7868d0; }
-  .listen-btn { background: var(--bg3); border: .5px solid var(--accent-border); border-radius: 12px; padding: 12px; color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; flex-shrink: 0; }
-  .listen-btn:active { opacity: .8; }
+/* ─── NEW PACK ─── */
+#new-pack{background:var(--bg)}
+.np-header{padding:max(52px,env(safe-area-inset-top)) 20px 16px;display:flex;align-items:center;gap:12px;border-bottom:.5px solid var(--border)}
+.np-title{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:600;color:var(--text)}
+.np-body{flex:1;padding:20px;display:flex;flex-direction:column;gap:16px;overflow-y:auto}
+.field-lbl{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px}
+.txt-input{width:100%;background:var(--bg2);border:.5px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;resize:none}
+.txt-input::placeholder{color:var(--text3)}
+.txt-input:focus{border-color:var(--accent-border)}
+.word-ta{min-height:155px;line-height:1.7}
+.hint{font-size:11px;color:var(--text3);line-height:1.65}
+.create-btn{background:var(--accent);border:none;border-radius:14px;padding:15px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:auto;display:flex;align-items:center;justify-content:center;gap:8px}
+.create-btn:disabled{opacity:.4}
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;flex:1;padding:40px;text-align:center}
+.loading-state p{font-size:14px;color:var(--text2);line-height:1.65}
 
-  /* toast */
-  .toast { position: fixed; bottom: max(90px, calc(env(safe-area-inset-bottom) + 80px)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg3); border: .5px solid var(--border2); border-radius: 10px; padding: 10px 18px; font-size: 13px; color: var(--text2); opacity: 0; transition: all .25s; pointer-events: none; white-space: nowrap; z-index: 100; }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* ─── WORD CARD ─── */
+#word-card{background:var(--bg)}
+.wc-header{padding:max(52px,env(safe-area-inset-top)) 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:.5px solid var(--border);flex-shrink:0}
+.wc-counter{font-size:10px;color:var(--text3);letter-spacing:.07em}
+.wc-name{font-size:12px;color:var(--text2);max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cards-cont{flex:1;position:relative;overflow:hidden;touch-action:pan-y}
+.card-inner{position:absolute;inset:0;display:flex;flex-direction:column;padding:18px 20px 0;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-  /* delete confirm overlay */
-  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: flex-end; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity .2s; }
-  .overlay.show { opacity: 1; pointer-events: all; }
-  .confirm-sheet { background: var(--bg2); border-radius: 20px 20px 0 0; border: .5px solid var(--border); padding: 20px; width: 100%; max-width: 500px; padding-bottom: max(28px, env(safe-area-inset-bottom)); }
-  .confirm-title { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-  .confirm-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
-  .confirm-btns { display: flex; gap: 10px; }
-  .confirm-cancel { flex: 1; background: var(--bg3); border: .5px solid var(--border); border-radius: 12px; padding: 13px; color: var(--text2); font-size: 14px; cursor: pointer; }
-  .confirm-delete { flex: 1; background: rgba(248,113,113,0.15); border: .5px solid rgba(248,113,113,0.3); border-radius: 12px; padding: 13px; color: var(--red); font-size: 14px; font-weight: 600; cursor: pointer; }
+.type-badge{display:inline-block;background:var(--accent-bg);border:.5px solid var(--accent-border);color:var(--accent);font-size:9px;padding:3px 9px;border-radius:6px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px;align-self:flex-start}
+.big-word{font-family:'DM Sans',sans-serif;font-size:38px;font-weight:700;color:var(--text);letter-spacing:-.03em;line-height:1;margin-bottom:5px}
+.ipa-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ipa-txt{font-size:12px;color:var(--text3)}
+.syl-txt{font-size:11px;color:var(--text3);margin-left:2px}
+.play-btn{width:24px;height:24px;border-radius:50%;background:var(--bg3);border:.5px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent);flex-shrink:0;font-size:9px}
+.tr-strip{display:flex;align-items:center;gap:8px;background:var(--bg2);border:.5px solid var(--border);border-radius:9px;padding:8px 12px;margin-bottom:12px}
+.tr-val{font-size:12px;color:var(--text2);flex:1}
+
+.root-block{border-top:.5px solid var(--border);padding:9px 0}
+.root-lbl{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.root-txt{font-size:12px;color:var(--text3);line-height:1.6}
+
+.primary-block{background:var(--bg3);border:.5px solid var(--accent-border);border-radius:12px;padding:12px 14px;margin:8px 0}
+.primary-hd{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.primary-badge{font-size:8px;color:var(--accent);background:var(--accent-bg);border:.5px solid var(--accent-border);border-radius:4px;padding:2px 7px;letter-spacing:.08em;text-transform:uppercase}
+.freq-track{flex:1;height:3px;background:var(--bg4);border-radius:3px}
+.freq-bar{height:100%;border-radius:3px;background:var(--accent)}
+.freq-pct{font-size:9px;color:var(--text3)}
+.primary-txt{font-size:13px;color:var(--text);line-height:1.65}
+
+/* example sentences */
+.ex-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.ex-item{border-left:2px solid var(--accent2);padding:7px 10px;border-radius:0 7px 7px 0;background:rgba(139,124,246,0.06)}
+.ex-en{font-size:12px;color:#c0c0d8;line-height:1.55;font-style:italic}
+
+.sec-layer{border-top:.5px solid var(--border);padding:9px 0}
+.sec-row{display:flex;align-items:flex-start;gap:7px}
+.sec-tag{font-size:8px;color:var(--text3);background:var(--bg3);border:.5px solid var(--border);border-radius:4px;padding:2px 6px;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap;margin-top:1px;flex-shrink:0}
+.rare-tag{font-size:8px;color:var(--text3);border:.5px solid var(--border);border-radius:4px;padding:2px 6px;text-transform:uppercase;white-space:nowrap;margin-top:1px;flex-shrink:0;opacity:.45}
+.sec-txt{font-size:12px;color:var(--text2);line-height:1.55;flex:1}
+.sec-tr-btn{font-size:8px;color:var(--text3);border:.5px solid var(--border);background:var(--bg3);border-radius:4px;padding:2px 5px;cursor:pointer;flex-shrink:0;margin-top:1px}
+.sec-tr-val{font-size:10px;color:var(--text3);font-style:italic;margin-top:4px;display:none}
+.sec-tr-val.vis{display:block}
+
+.known-row{display:flex;align-items:center;gap:8px;padding:8px 0}
+.known-lbl{font-size:11px;color:var(--green)}
+.undo-btn{font-size:10px;color:var(--text3);border:.5px solid var(--border);background:var(--bg3);border-radius:6px;padding:3px 10px;cursor:pointer}
+.swipe-hint{text-align:center;font-size:10px;color:var(--text3);padding:12px 0 max(18px,env(safe-area-inset-bottom));opacity:.35}
+
+.card-nav{display:flex;gap:10px;padding:10px 20px max(16px,env(safe-area-inset-bottom));border-top:.5px solid var(--border);flex-shrink:0}
+.nav-arrow{flex:1;background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:20px;user-select:none}
+.nav-arrow.accent{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+.know-btn{flex:2;background:var(--accent);border:none;border-radius:12px;padding:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.know-btn.known{background:var(--bg3);border:.5px solid var(--green);color:var(--green)}
+
+/* ─── STORY ─── */
+#story{background:var(--bg)}
+.story-hd{padding:max(52px,env(safe-area-inset-top)) 20px 14px;display:flex;align-items:center;gap:12px;border-bottom:.5px solid var(--border);flex-shrink:0}
+.story-icon{width:34px;height:34px;background:var(--accent-bg);border:.5px solid var(--accent-border);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:16px;flex-shrink:0}
+.story-pname{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--text)}
+.story-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.story-body{flex:1;overflow-y:auto;padding:12px 20px;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px}
+
+.tone-toggle{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:.5px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;flex-shrink:0}
+.tone-left{display:flex;align-items:center;gap:8px}
+.tone-chip-active{background:var(--accent-bg);border:.5px solid var(--accent-border);color:var(--accent);font-size:11px;padding:3px 10px;border-radius:20px}
+.tone-chev{font-size:12px;color:var(--text3);transition:transform .2s}
+.tone-chev.open{transform:rotate(180deg)}
+.tone-drawer{max-height:0;overflow:hidden;transition:max-height .28s ease;flex-shrink:0}
+.tone-drawer.open{max-height:90px}
+.tones{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0 4px}
+.tone-opt{background:var(--bg3);border:.5px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--text3);cursor:pointer}
+.tone-opt.on{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)}
+
+.kw-row{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.kw-lbl{font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.kw-inp{flex:1;background:var(--bg2);border:.5px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-size:13px;outline:none;font-family:'Inter',sans-serif}
+.kw-inp:focus{border-color:var(--accent-border)}
+.kw-inp::placeholder{color:var(--text3)}
+.regen-btn{width:38px;height:38px;border-radius:9px;background:var(--accent-bg);border:.5px solid var(--accent-border);display:flex;align-items:center;justify-content:center;color:var(--accent);cursor:pointer;font-size:16px;flex-shrink:0}
+
+.story-box{background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:16px}
+.story-txt{font-size:13px;color:var(--text2);line-height:2}
+.hw{color:#b0a0f8;font-weight:500}
+.story-load{display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px 0}
+.story-load p{font-size:12px;color:var(--text3)}
+.used-words{display:flex;flex-wrap:wrap;gap:5px;flex-shrink:0}
+.w-chip{background:var(--bg3);border:.5px solid var(--border);border-radius:6px;padding:3px 8px;font-size:10px;color:var(--text3)}
+.w-chip.used{border-color:rgba(139,124,246,.3);color:#7868d0}
+.listen-btn{background:var(--bg3);border:.5px solid var(--accent-border);border-radius:12px;padding:12px;color:var(--accent);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;flex-shrink:0}
+
+/* ─── QUICK LOOKUP ─── */
+#quick-lookup{background:var(--bg)}
+.ql-hd{padding:max(52px,env(safe-area-inset-top)) 20px 16px;border-bottom:.5px solid var(--border);flex-shrink:0}
+.ql-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.ql-title{font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:var(--text)}
+.ql-sub{font-size:12px;color:var(--text3)}
+.ql-body{flex:1;overflow-y:auto;padding:14px 20px;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:12px}
+.ql-inp-row{display:flex;gap:8px}
+.ql-inp{flex:1;background:var(--bg2);border:.5px solid var(--border);border-radius:12px;padding:13px 16px;color:var(--text);font-size:16px;outline:none;font-family:'Inter',sans-serif}
+.ql-inp:focus{border-color:var(--accent-border)}
+.ql-inp::placeholder{color:var(--text3)}
+.ql-btn{background:var(--accent);border:none;border-radius:12px;padding:13px 18px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+
+/* lookup result card */
+.ql-result{background:var(--bg2);border:.5px solid var(--border);border-radius:14px;padding:18px;display:none;flex-direction:column;gap:14px}
+.ql-result.vis{display:flex}
+.ql-word{font-family:'DM Sans',sans-serif;font-size:32px;font-weight:700;color:var(--text);letter-spacing:-.02em}
+.ql-ipa-row{display:flex;align-items:center;gap:8px;margin-top:3px}
+.ql-play{width:24px;height:24px;border-radius:50%;background:var(--bg3);border:.5px solid var(--border2);display:flex;align-items:center;justify-content:center;color:var(--accent);cursor:pointer;font-size:9px}
+.ql-ipa{font-size:12px;color:var(--text3)}
+.ql-type{font-size:9px;color:var(--accent);background:var(--accent-bg);border:.5px solid var(--accent-border);border-radius:5px;padding:2px 8px;text-transform:uppercase;letter-spacing:.07em}
+.ql-tr-strip{background:var(--bg3);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text2)}
+
+.ql-section{border-top:.5px solid var(--border);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.ql-sec-lbl{font-size:9px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.ql-sec-txt{font-size:13px;color:var(--text);line-height:1.65}
+
+/* lookup example with inline TR */
+.ql-ex-item{background:var(--bg3);border-radius:9px;padding:10px 12px;cursor:pointer;position:relative}
+.ql-ex-en{font-size:12.5px;color:#c8c8de;line-height:1.6;font-style:italic}
+.ql-ex-tr{font-size:11px;color:var(--text3);margin-top:5px;padding-top:5px;border-top:.5px solid var(--border);display:none;font-style:normal;line-height:1.5}
+.ql-ex-tr.vis{display:block}
+.ql-ex-tap{font-size:9px;color:var(--text3);margin-top:4px;opacity:.5}
+
+.ql-load{display:flex;align-items:center;gap:12px;padding:20px 0}
+.ql-load p{font-size:13px;color:var(--text3)}
 </style>
 </head>
 <body>
 
 <!-- API SETUP -->
 <div id="api-setup" class="screen active">
-  <div class="api-logo">
-    <img class="api-logo-img" src="https://i.imgur.com/placeholder.png" onerror="this.style.display='none'" alt="">
-    <div style="font-size:28px;margin-right:4px">🦡</div>
-    <div class="api-logo-text">Word Badger</div>
+  <div class="setup-logo">
+    <div class="setup-logo-icon">🦡</div>
+    <div class="setup-logo-text">Word Badger</div>
   </div>
-  <div class="api-headline">Enter your<br>Anthropic API key</div>
-  <div class="api-sub">Word Badger uses AI to deeply analyze vocabulary. Your key is stored only on this device.<br><br>Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
-  <div class="api-field-label">API Key</div>
-  <input class="api-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off" autocorrect="off" spellcheck="false">
-  <button class="api-btn" onclick="saveApiKey()">Start Learning →</button>
-  <div class="api-note">Your key never leaves your device. Saved locally in your browser.</div>
+  <div class="setup-headline">Enter your<br>Anthropic API key</div>
+  <div class="setup-sub">Word Badger uses AI to deeply analyze vocabulary. Your key is stored only on this device.<br><br>Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></div>
+  <div class="setup-lbl">API Key</div>
+  <input class="setup-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off" autocorrect="off" spellcheck="false">
+  <button class="setup-btn" onclick="saveApiKey()">Start Learning →</button>
+  <div class="setup-note">Your key never leaves this device. Saved locally in your browser.</div>
 </div>
 
 <!-- HOME -->
 <div id="home" class="screen">
   <div class="home-header">
     <div class="logo-row">
-      <div style="font-size:22px">🦡</div>
+      <div class="logo-icon">🦡</div>
       <div class="logo-text">Word Badger</div>
     </div>
     <div style="font-size:11px;color:var(--text3)" id="home-date"></div>
@@ -261,15 +279,16 @@
       <div class="stat-box"><span class="stat-num" id="stat-packs">0</span><span class="stat-lbl">Packs</span></div>
       <div class="stat-box"><span class="stat-num" id="stat-done">0</span><span class="stat-lbl">Learned</span></div>
     </div>
-    <div class="section-label">Study Packs</div>
+    <div class="sec-label">Study Packs</div>
     <div id="pack-list"></div>
+    <div id="swipe-tip" style="text-align:center;font-size:10px;color:var(--text3);opacity:.4;padding:4px 0 8px;display:none">← swipe left to delete</div>
     <div style="height:8px"></div>
   </div>
   <div style="padding:0 20px 6px">
     <button class="new-btn" onclick="showScreen('new-pack')"><span style="font-size:18px">+</span> New Study Pack</button>
   </div>
   <div class="bottom-nav">
-    <div class="nav-item on">
+    <div class="nav-item on" onclick="showScreen('home')">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Packs
     </div>
@@ -284,18 +303,101 @@
   </div>
 </div>
 
+<!-- NEW PACK -->
+<div id="new-pack" class="screen">
+  <div class="np-header">
+    <div class="back-btn" onclick="showScreen('home')">‹</div>
+    <div class="np-title">New Study Pack</div>
+  </div>
+  <div class="np-body" id="np-body">
+    <div>
+      <div class="field-lbl">Pack Name (optional)</div>
+      <input class="txt-input" id="pack-name-input" type="text" placeholder="e.g. Words from this week...">
+    </div>
+    <div>
+      <div class="field-lbl">Paste your word list</div>
+      <textarea class="txt-input word-ta" id="word-list-input" placeholder="nonchalant&#10;audacity&#10;volatile&#10;&#10;Any format — one per line, comma separated... AI will clean it up."></textarea>
+    </div>
+    <div class="hint">Paste words in any format. AI will remove duplicates, fix formatting, and deeply analyze every word.</div>
+    <button class="create-btn" id="create-btn" onclick="createPack()">Analyze with AI →</button>
+  </div>
+</div>
+
+<!-- WORD CARD -->
+<div id="word-card" class="screen">
+  <div class="wc-header">
+    <div class="back-btn" onclick="exitCards()">‹</div>
+    <div style="text-align:center">
+      <div class="wc-name" id="wc-pack-name">Pack</div>
+      <div class="wc-counter" id="wc-counter">1 / 1</div>
+    </div>
+    <div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:18px" onclick="openStory()">✦</div>
+  </div>
+  <div class="cards-cont" id="cards-cont">
+    <div class="card-inner" id="card-inner"></div>
+  </div>
+  <div class="card-nav">
+    <div class="nav-arrow" onclick="prevCard()">←</div>
+    <div class="know-btn" id="know-btn" onclick="toggleKnown()">✓ I know this</div>
+    <div class="nav-arrow accent" onclick="nextCard()">→</div>
+  </div>
+</div>
+
+<!-- STORY -->
+<div id="story" class="screen">
+  <div class="story-hd">
+    <div class="back-btn" onclick="showScreen('word-card')">‹</div>
+    <div style="flex:1">
+      <div class="story-pname" id="story-pack-name">Story Mode</div>
+      <div class="story-sub" id="story-meta">AI-generated immersive story</div>
+    </div>
+  </div>
+  <div class="story-body">
+    <div class="tone-toggle" onclick="toggleToneDrawer()">
+      <div class="tone-left"><span style="font-size:14px">🎭</span><span style="font-size:11px;color:var(--text2)">Tone</span></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="tone-chip-active" id="active-tone">Dark</span>
+        <span class="tone-chev" id="tone-chev">▾</span>
+      </div>
+    </div>
+    <div class="tone-drawer" id="tone-drawer">
+      <div class="tones">
+        <div class="tone-opt on" onclick="selectTone(this)">Dark</div>
+        <div class="tone-opt" onclick="selectTone(this)">Cinematic</div>
+        <div class="tone-opt" onclick="selectTone(this)">Romantic</div>
+        <div class="tone-opt" onclick="selectTone(this)">Philosophical</div>
+        <div class="tone-opt" onclick="selectTone(this)">Funny</div>
+        <div class="tone-opt" onclick="selectTone(this)">Sci-fi</div>
+        <div class="tone-opt" onclick="selectTone(this)">Historical</div>
+        <div class="tone-opt" onclick="selectTone(this)">Daily life</div>
+        <div class="tone-opt" onclick="selectTone(this)">Motivational</div>
+      </div>
+    </div>
+    <div class="kw-row">
+      <span class="kw-lbl">Topic</span>
+      <input class="kw-inp" id="story-topic" placeholder="Istanbul, chess, a breakup...">
+      <div class="regen-btn" onclick="generateStory()">↺</div>
+    </div>
+    <div class="story-box" id="story-content">
+      <div class="story-load"><div class="spinner"></div><p>Writing your story...</p></div>
+    </div>
+    <div class="used-words" id="story-chips"></div>
+    <button class="listen-btn" id="listen-btn" onclick="listenStory()">▶ Listen to story</button>
+  </div>
+</div>
+
 <!-- QUICK LOOKUP -->
 <div id="quick-lookup" class="screen">
-  <div class="ql-header">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+  <div class="ql-hd">
+    <div class="ql-top">
       <div class="back-btn" onclick="showScreen('home')">‹</div>
       <div class="ql-title">Quick Lookup</div>
     </div>
-    <div class="ql-sub">Type any English word — get instant deep analysis</div>
+    <div class="ql-sub">Type any word — get instant deep analysis</div>
   </div>
   <div class="ql-body">
-    <div class="ql-input-row">
-      <input class="ql-input" id="ql-input" placeholder="e.g. nonchalant, audacity..." onkeydown="if(event.key==='Enter')lookupWord()">
+    <div class="ql-inp-row">
+      <input class="ql-inp" id="ql-inp" placeholder="e.g. nonchalant, audacity..." onkeydown="if(event.key==='Enter')lookupWord()">
       <button class="ql-btn" onclick="lookupWord()">Analyze</button>
     </div>
     <div class="ql-result" id="ql-result"></div>
@@ -316,97 +418,14 @@
   </div>
 </div>
 
-<!-- NEW PACK -->
-<div id="new-pack" class="screen">
-  <div class="np-header">
-    <div class="back-btn" onclick="showScreen('home')">‹</div>
-    <div class="np-title">New Study Pack</div>
-  </div>
-  <div class="np-body" id="np-body">
-    <div>
-      <div class="field-label">Pack Name (optional)</div>
-      <input class="text-input" id="pack-name-input" type="text" placeholder="e.g. Words from this week...">
-    </div>
-    <div>
-      <div class="field-label">Paste your word list</div>
-      <textarea class="text-input word-textarea" id="word-list-input" placeholder="nonchalant&#10;audacity&#10;volatile&#10;&#10;Any format — one per line, comma separated... AI will clean it up."></textarea>
-    </div>
-    <div class="hint-text">Paste words in any format. AI will clean duplicates, fix formatting, and deeply analyze each word.</div>
-    <button class="create-btn" id="create-btn" onclick="createPack()"><span>Analyze with AI</span> <span style="font-size:16px">→</span></button>
-  </div>
-</div>
-
-<!-- WORD CARD -->
-<div id="word-card" class="screen">
-  <div class="wc-header">
-    <div class="back-btn" onclick="exitCards()">‹</div>
-    <div style="text-align:center">
-      <div class="wc-pack-name" id="wc-pack-name">Pack</div>
-      <div class="wc-counter" id="wc-counter">1 / 1</div>
-    </div>
-    <div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:18px" onclick="openStory()">✦</div>
-  </div>
-  <div class="cards-container" id="cards-container">
-    <div class="word-card-inner" id="card-inner"></div>
-  </div>
-  <div class="card-nav-bar">
-    <div class="nav-arrow" onclick="prevCard()">←</div>
-    <div class="know-btn" id="know-btn" onclick="toggleKnown()">✓ I know this</div>
-    <div class="nav-arrow" style="background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent)" onclick="nextCard()">→</div>
-  </div>
-</div>
-
-<!-- STORY -->
-<div id="story" class="screen">
-  <div class="story-header">
-    <div class="back-btn" onclick="showScreen('word-card')">‹</div>
-    <div style="flex:1">
-      <div class="story-pack-name" id="story-pack-name">Story Mode</div>
-      <div class="story-sub" id="story-meta">AI-generated immersive story</div>
-    </div>
-  </div>
-  <div class="story-body">
-    <div class="tone-toggle" onclick="toggleToneDrawer()">
-      <div class="tone-left"><span style="font-size:14px">🎭</span><span class="tone-label-sm">Tone</span></div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="tone-active-chip" id="active-tone">Dark</span>
-        <span class="tone-chevron" id="tone-chev">▾</span>
-      </div>
-    </div>
-    <div class="tone-drawer" id="tone-drawer">
-      <div class="tones-wrap">
-        <div class="tone-chip on" onclick="selectTone(this)">Dark</div>
-        <div class="tone-chip" onclick="selectTone(this)">Cinematic</div>
-        <div class="tone-chip" onclick="selectTone(this)">Romantic</div>
-        <div class="tone-chip" onclick="selectTone(this)">Philosophical</div>
-        <div class="tone-chip" onclick="selectTone(this)">Funny</div>
-        <div class="tone-chip" onclick="selectTone(this)">Sci-fi</div>
-        <div class="tone-chip" onclick="selectTone(this)">Historical</div>
-        <div class="tone-chip" onclick="selectTone(this)">Daily life</div>
-        <div class="tone-chip" onclick="selectTone(this)">Motivational</div>
-      </div>
-    </div>
-    <div class="kw-row">
-      <span class="kw-label">Topic</span>
-      <input class="kw-input" id="story-topic" placeholder="Istanbul, chess, a breakup...">
-      <div class="regen-btn" onclick="generateStory()">↺</div>
-    </div>
-    <div class="story-content" id="story-content">
-      <div class="story-loading"><div class="spinner"></div><p>Generating your story...</p></div>
-    </div>
-    <div class="used-words" id="story-word-chips"></div>
-    <button class="listen-btn" id="listen-btn" onclick="listenStory()">▶ Listen to story</button>
-  </div>
-</div>
-
-<!-- DELETE CONFIRM -->
-<div class="overlay" id="delete-overlay" onclick="cancelDelete()">
-  <div class="confirm-sheet" onclick="event.stopPropagation()">
-    <div class="confirm-title">Delete this pack?</div>
-    <div class="confirm-sub" id="confirm-sub">This will permanently remove the pack and all its words.</div>
-    <div class="confirm-btns">
-      <button class="confirm-cancel" onclick="cancelDelete()">Cancel</button>
-      <button class="confirm-delete" onclick="confirmDelete()">Delete</button>
+<!-- DELETE SHEET -->
+<div class="overlay" id="del-overlay" onclick="cancelDel()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-title">Delete this pack?</div>
+    <div class="sheet-sub" id="del-sub">This will permanently remove the pack.</div>
+    <div class="sheet-btns">
+      <button class="btn-cancel" onclick="cancelDel()">Cancel</button>
+      <button class="btn-del" onclick="confirmDel()">Delete</button>
     </div>
   </div>
 </div>
@@ -414,122 +433,157 @@
 <div class="toast" id="toast"></div>
 
 <script>
-let API_KEY = localStorage.getItem('wb_api_key') || '';
-let packs = JSON.parse(localStorage.getItem('wb_packs') || '[]');
-let currentPackIndex = -1;
-let currentPack = null;
-let currentWordIndex = 0;
-let currentTone = 'Dark';
-let storyText = '';
-let deleteTargetIndex = -1;
-let isSpeaking = false;
+// ── STATE ──
+let API_KEY = localStorage.getItem('wb_api_key')||'';
+let packs = JSON.parse(localStorage.getItem('wb_packs')||'[]');
+let currentPackIdx = -1, currentPack = null, currentWordIdx = 0;
+let currentTone = 'Dark', storyText = '', speaking = false;
+let delTarget = -1;
+const COLORS = ['#8b7cf6','#f59e0b','#34d399','#f87171','#60a5fa','#f472b6','#a78bfa','#fb923c'];
 
 window.addEventListener('load', () => {
-  document.getElementById('home-date').textContent = new Date().toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
-  if (API_KEY) { showScreen('home'); renderHome(); }
-  else showScreen('api-setup');
+  document.getElementById('home-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  if (API_KEY) { showScreen('home'); renderHome(); } else showScreen('api-setup');
 });
 
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if (id==='home') renderHome();
 }
 
 function saveApiKey() {
-  const key = document.getElementById('api-key-input').value.trim();
-  if (!key.startsWith('sk-ant')) { showToast('Invalid key format'); return; }
-  API_KEY = key;
-  localStorage.setItem('wb_api_key', key);
+  const k = document.getElementById('api-key-input').value.trim();
+  if (!k.startsWith('sk-ant')) { showToast('Invalid key format'); return; }
+  API_KEY=k; localStorage.setItem('wb_api_key',k);
   showScreen('home');
-  renderHome();
 }
 
 // ── HOME ──
 function renderHome() {
-  const totalWords = packs.reduce((s,p) => s+(p.words?p.words.length:0), 0);
-  const learned = packs.reduce((s,p) => s+(p.known?p.known.length:0), 0);
-  document.getElementById('stat-words').textContent = totalWords;
-  document.getElementById('stat-packs').textContent = packs.length;
-  document.getElementById('stat-done').textContent = learned;
+  const tw = packs.reduce((s,p)=>s+(p.words?p.words.length:0),0);
+  const tl = packs.reduce((s,p)=>s+(p.known?p.known.length:0),0);
+  document.getElementById('stat-words').textContent=tw;
+  document.getElementById('stat-packs').textContent=packs.length;
+  document.getElementById('stat-done').textContent=tl;
   const list = document.getElementById('pack-list');
+  const tip = document.getElementById('swipe-tip');
   if (!packs.length) {
-    list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.8">No packs yet.<br>Create your first study pack.</div>`;
-    return;
+    list.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:13px;line-height:1.9">No packs yet.<br>Create your first study pack.</div>`;
+    tip.style.display='none'; return;
   }
-  const colors = ['#8b7cf6','#f59e0b','#34d399','#f87171','#60a5fa','#f472b6','#a78bfa','#fb923c'];
-  list.innerHTML = packs.slice().reverse().map((p,ri) => {
+  tip.style.display = packs.length > 0 ? 'block' : 'none';
+  list.innerHTML = packs.slice().reverse().map((p,ri)=>{
     const i = packs.length-1-ri;
-    const known = p.known?p.known.length:0;
-    const total = p.words?p.words.length:0;
-    const pct = total ? Math.round((known/total)*100) : 0;
-    const col = colors[i % colors.length];
+    const known = p.known?p.known.length:0, total = p.words?p.words.length:0;
+    const pct = total?Math.round((known/total)*100):0;
+    const col = COLORS[i%COLORS.length];
     const status = pct===100?'Completed':pct>0?`${pct}% done`:'Not started';
-    const date = p.created ? new Date(p.created).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    return `<div class="pack-card">
-      <div class="pack-accent" style="background:${col}"></div>
-      <div class="pack-inner" onclick="openPack(${i})">
-        <div class="pack-num">PACK ${String(i+1).padStart(2,'0')} · ${date}</div>
-        <div class="pack-name">${p.name||'Pack '+(i+1)}</div>
-        <div class="pack-meta-row">
-          <div class="pack-meta-left">
+    const date = p.created?new Date(p.created).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+    return `<div class="pack-wrap" id="pw-${i}">
+      <div class="pack-delete-bg" id="pdb-${i}">Delete</div>
+      <div class="pack-card" id="pc-${i}" onclick="openPack(${i})">
+        <div class="pack-accent" style="background:${col}"></div>
+        <div class="pack-inner">
+          <div class="pack-num">PACK ${String(i+1).padStart(2,'0')} · ${date}</div>
+          <div class="pack-name">${p.name||'Pack '+(i+1)}</div>
+          <div class="pack-meta">
             <span class="pack-words">${total} words</span>
             <div class="pack-dot"></div>
             <span class="pack-status">${status}</span>
           </div>
-          <div class="pack-delete" onclick="event.stopPropagation();askDelete(${i},'${(p.name||'Pack '+(i+1)).replace(/'/g,"\\'")}')">🗑</div>
+          <div class="pack-bar"><div class="pack-fill" style="width:${pct}%;background:${col}"></div></div>
         </div>
-        <div class="pack-bar"><div class="pack-fill" style="width:${pct}%;background:${col}"></div></div>
       </div>
     </div>`;
   }).join('');
+  // attach swipe listeners
+  packs.slice().reverse().forEach((_,ri)=>{
+    const i = packs.length-1-ri;
+    initSwipeDelete(i);
+  });
 }
 
-// ── DELETE ──
-function askDelete(index, name) {
-  deleteTargetIndex = index;
-  document.getElementById('confirm-sub').textContent = `"${name}" and all its words will be permanently removed.`;
-  document.getElementById('delete-overlay').classList.add('show');
+function initSwipeDelete(idx) {
+  const card = document.getElementById(`pc-${idx}`);
+  if (!card) return;
+  let startX=0, startY=0, dx=0, swiping=false, opened=false;
+  const THRESHOLD = 72;
+
+  card.addEventListener('touchstart', e=>{
+    startX=e.touches[0].clientX; startY=e.touches[0].clientY; dx=0; swiping=true;
+  },{passive:true});
+
+  card.addEventListener('touchmove', e=>{
+    if(!swiping) return;
+    dx = e.touches[0].clientX - startX;
+    const dy = Math.abs(e.touches[0].clientY - startY);
+    if (dy > Math.abs(dx)*1.5) { swiping=false; return; }
+    if (dx < 0) { card.style.transform=`translateX(${Math.max(dx,-THRESHOLD)}px)`; }
+  },{passive:true});
+
+  card.addEventListener('touchend', ()=>{
+    swiping=false;
+    if (dx < -THRESHOLD*0.6) {
+      card.style.transform=`translateX(-${THRESHOLD}px)`;
+      opened=true;
+      // auto-close after 2.5s
+      setTimeout(()=>{ if(opened){ card.style.transform=''; opened=false; } },2500);
+      // tap on revealed delete triggers confirm
+      const bg = document.getElementById(`pdb-${idx}`);
+      if (bg) bg.onclick = ()=>askDel(idx, packs[idx]?.name||`Pack ${idx+1}`);
+    } else {
+      card.style.transform='';
+      opened=false;
+    }
+  });
 }
-function cancelDelete() {
-  deleteTargetIndex = -1;
-  document.getElementById('delete-overlay').classList.remove('show');
+
+function askDel(idx, name) {
+  delTarget=idx;
+  document.getElementById('del-sub').textContent=`"${name}" and all its words will be permanently removed.`;
+  document.getElementById('del-overlay').classList.add('show');
 }
-function confirmDelete() {
-  if (deleteTargetIndex < 0) return;
-  packs.splice(deleteTargetIndex, 1);
-  savePacks();
-  renderHome();
-  cancelDelete();
-  showToast('Pack deleted');
+function cancelDel() { delTarget=-1; document.getElementById('del-overlay').classList.remove('show'); }
+function confirmDel() {
+  if (delTarget<0) return;
+  packs.splice(delTarget,1); savePacks(); renderHome(); cancelDel(); showToast('Pack deleted');
 }
 
 // ── CREATE PACK ──
 async function createPack() {
-  const raw = document.getElementById('word-list-input').value.trim();
-  const name = document.getElementById('pack-name-input').value.trim();
-  if (!raw) { showToast('Please paste some words first'); return; }
-  const btn = document.getElementById('create-btn');
-  const body = document.getElementById('np-body');
-  btn.disabled = true;
-  body.innerHTML = `<div class="loading-state"><div class="spinner"></div><div class="loading-text">AI is analyzing your vocabulary...<br><br>This may take 30–60 seconds.</div></div>`;
+  const raw=document.getElementById('word-list-input').value.trim();
+  const name=document.getElementById('pack-name-input').value.trim();
+  if(!raw){showToast('Please paste some words first');return;}
+  document.getElementById('create-btn').disabled=true;
+  document.getElementById('np-body').innerHTML=`<div class="loading-state"><div class="spinner"></div><p>AI is analyzing your vocabulary...<br>This may take 30–60 seconds.</p></div>`;
   try {
-    const words = await analyzeWords(raw);
-    const pack = { id: Date.now(), name: name||'Pack '+(packs.length+1), created: new Date().toISOString(), words, known: [] };
-    packs.push(pack);
-    savePacks();
-    renderHome();
-    openPack(packs.length-1);
+    const words=await analyzeWords(raw);
+    const pack={id:Date.now(),name:name||'Pack '+(packs.length+1),created:new Date().toISOString(),words,known:[]};
+    packs.push(pack); savePacks(); openPack(packs.length-1);
   } catch(e) {
-    body.innerHTML = `<div class="loading-state"><div style="font-size:32px">⚠</div><div class="loading-text">Something went wrong.<br>${e.message}</div><button class="create-btn" onclick="location.reload()" style="margin-top:16px">Try Again</button></div>`;
+    document.getElementById('np-body').innerHTML=`<div class="loading-state"><div style="font-size:28px">⚠</div><p>${e.message}</p><button class="create-btn" onclick="location.reload()" style="margin-top:16px">Try Again</button></div>`;
   }
 }
 
+async function callAI(prompt, maxTokens=8000) {
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:maxTokens,messages:[{role:'user',content:prompt}]})
+  });
+  if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error '+res.status);}
+  const d=await res.json();
+  return d.content[0].text;
+}
+
 async function analyzeWords(raw) {
-  const prompt = `You are a vocabulary analysis AI for Word Badger, an advanced English vocabulary app for Turkish speakers.
+  const prompt=`You are a vocabulary analysis AI for Word Badger, an advanced English learning app for Turkish speakers.
 
-Extract all unique English words/phrases from the input and analyze each one.
+Extract unique English words from the input and deeply analyze each one.
+Return ONLY a valid JSON array — no markdown, no backticks, no explanation.
 
-Return ONLY a valid JSON array. No markdown, no backticks, no explanation. Just raw JSON.
+CRITICAL: Every "secondary" usage entry MUST include "example_en" and "example_tr" fields with a natural, realistic example sentence. Do not skip these.
 
 Each item structure:
 {
@@ -538,315 +592,294 @@ Each item structure:
   "ipa": "/ˌnɒn.ʃəˈlɑːnt/",
   "syllables": "non·cha·lant",
   "tr_quick": "umursamaz, kayıtsız, soğukkanlı",
-  "root": "From French 'nonchaloir' — to not be warm about. Literally: without passion.",
+  "root": "From French 'nonchaloir' — to not be warm about. Literally: without passion or heat.",
   "primary_usage": {
     "label": "MOST COMMON USE",
     "frequency": 91,
     "text": "Acting deliberately unbothered to project confidence or coolness — even when you actually do care.",
-    "example_en": "She walked in late, acting completely nonchalant about it.",
-    "example_tr": "Geç geldi ama hiç umursamaz bir tavırla davrandı."
+    "examples": [
+      {"en": "She walked in late, acting completely nonchalant about it.", "tr": "Geç geldi ama hiç umursamaz bir tavırla davrandı."},
+      {"en": "He gave a nonchalant shrug when they told him he didn't get the job.", "tr": "İşe alınmadığını söylediklerinde umursamazca omuz silkti."},
+      {"en": "Try to act nonchalant — don't let them know you care.", "tr": "Umursamaz görünmeye çalış — önem verdiğini belli etme."}
+    ]
   },
   "secondary": [
     {
       "tag": "EMOTIONAL",
-      "text": "Can signal genuine indifference, or emotional unavailability in close relationships.",
-      "example_en": "He was so nonchalant about their breakup that it hurt more than tears would have.",
-      "tr": "İlişkilerde gerçek ilgisizliği ya da duygusal erişilemezliği gösterebilir.",
+      "text": "Can signal genuine indifference or emotional unavailability in close relationships.",
+      "example_en": "He was so nonchalant about their breakup that it hurt more than anger would have.",
+      "example_tr": "Ayrılıklarına karşı o kadar kayıtsızdı ki bu öfkeden daha çok acıttı.",
       "rare": false
     },
     {
-      "tag": "LITERARY",
-      "text": "In literary contexts, a nonchalant character often masks deeper internal conflict.",
+      "tag": "LITERARY / RARE",
+      "text": "In literary contexts, a nonchalant character often masks profound internal conflict.",
       "example_en": "The detective's nonchalant air concealed a mind working at full speed.",
-      "tr": "Edebi bağlamda umursamaz karakter genellikle derin bir çatışmayı gizler.",
+      "example_tr": "Dedektifin umursamaz havası, tam hızda çalışan bir zihni gizliyordu.",
       "rare": true
     }
   ]
 }
 
-IMPORTANT: Every secondary item must include an "example_en" field with a natural example sentence.
-
-Raw word list:
+Word list:
 ${raw}
 
-Return the JSON array now. Maximum 40 words.`;
+Return the JSON array. Maximum 40 words.`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 8000, messages: [{ role: 'user', content: prompt }] })
-  });
-  if (!res.ok) { const err = await res.json(); throw new Error(err.error?.message || 'API error '+res.status); }
-  const data = await res.json();
-  const text = data.content[0].text.trim().replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
-  return JSON.parse(text);
+  const text=await callAI(prompt,9000);
+  const clean=text.trim().replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+  return JSON.parse(clean);
 }
 
 // ── OPEN PACK ──
-function openPack(index) {
-  currentPackIndex = index;
-  currentPack = packs[index];
-  currentWordIndex = 0;
-  document.getElementById('wc-pack-name').textContent = currentPack.name;
-  renderCard(0);
-  showScreen('word-card');
+function openPack(idx) {
+  currentPackIdx=idx; currentPack=packs[idx]; currentWordIdx=0;
+  document.getElementById('wc-pack-name').textContent=currentPack.name;
+  renderCard(0); showScreen('word-card');
 }
-
-function exitCards() { showScreen('home'); renderHome(); }
+function exitCards(){ showScreen('home'); }
 
 // ── RENDER CARD ──
 function renderCard(idx) {
-  if (!currentPack || !currentPack.words[idx]) return;
-  const w = currentPack.words[idx];
-  const total = currentPack.words.length;
-  document.getElementById('wc-counter').textContent = `${idx+1} / ${total}`;
+  if(!currentPack||!currentPack.words[idx]) return;
+  const w=currentPack.words[idx];
+  document.getElementById('wc-counter').textContent=`${idx+1} / ${currentPack.words.length}`;
+  const isKnown=(currentPack.known||[]).includes(w.word);
+  const kb=document.getElementById('know-btn');
+  kb.textContent=isKnown?'✓ Known':'✓ I know this';
+  kb.className=isKnown?'know-btn known':'know-btn';
 
-  const isKnown = currentPack.known && currentPack.known.includes(w.word);
-  const knowBtn = document.getElementById('know-btn');
-  if (knowBtn) {
-    knowBtn.textContent = isKnown ? '✓ Known' : '✓ I know this';
-    knowBtn.className = isKnown ? 'know-btn known' : 'know-btn';
-  }
-
-  const secHTML = (w.secondary||[]).map((s,si) => `
-    <div class="secondary-layer">
-      <div class="sec-row">
-        ${s.rare ? `<span class="rare-tag">${s.tag}</span>` : `<span class="sec-tag">${s.tag}</span>`}
-        <span class="sec-text ${s.rare?'':''}${s.rare?'dim-text':''}">${s.text}</span>
-        <span class="sec-tr-btn" onclick="toggleSecTr('str${si}')">TR</span>
-      </div>
-      ${s.example_en ? `<div class="sec-example">"${s.example_en}"</div>` : ''}
-      <div class="sec-tr-val" id="str${si}">${s.tr||''}</div>
+  // primary examples
+  const primExHTML = (w.primary_usage?.examples||[]).map((ex,ei)=>`
+    <div class="ex-item">
+      <div class="ex-en">"${ex.en}"</div>
+      <div class="tr-pill" onclick="toggleTr('ptr${idx}_${ei}')"><span style="font-size:11px">🇹🇷</span> TR</div>
+      <div class="tr-reveal" id="ptr${idx}_${ei}">${ex.tr||''}</div>
     </div>`).join('');
 
-  document.getElementById('card-inner').innerHTML = `
-    <span class="word-type-badge">${w.type||'word'}</span>
+  // secondary layers
+  const secHTML=(w.secondary||[]).map((s,si)=>`
+    <div class="sec-layer">
+      <div class="sec-row">
+        ${s.rare?`<span class="rare-tag">${s.tag}</span>`:`<span class="sec-tag">${s.tag}</span>`}
+        <span class="sec-txt">${s.text}</span>
+        <span class="sec-tr-btn" onclick="toggleTr('str${idx}_${si}')">TR</span>
+      </div>
+      ${s.example_en?`<div class="ex-item" style="margin-top:7px">
+        <div class="ex-en">"${s.example_en}"</div>
+        <div class="tr-pill" onclick="toggleTr('setr${idx}_${si}')"><span style="font-size:11px">🇹🇷</span> TR</div>
+        <div class="tr-reveal" id="setr${idx}_${si}">${s.example_tr||''}</div>
+      </div>`:''}
+      <div class="sec-tr-val" id="str${idx}_${si}">${s.tr||''}</div>
+    </div>`).join('');
+
+  document.getElementById('card-inner').innerHTML=`
+    <span class="type-badge">${w.type||'word'}</span>
     <div class="big-word">${w.word}</div>
     <div class="ipa-row">
       <div class="play-btn" onclick="speakWord('${w.word}')">▶</div>
-      <span class="ipa-text">${w.ipa||''}</span>
-      <span style="color:var(--text3);font-size:11px;margin-left:4px">${w.syllables||''}</span>
+      <span class="ipa-txt">${w.ipa||''}</span>
+      <span class="syl-txt">${w.syllables||''}</span>
     </div>
     <div class="tr-strip">
       <span style="font-size:14px">🇹🇷</span>
       <span class="tr-val">${w.tr_quick||''}</span>
     </div>
-    ${w.root ? `<div class="root-block"><div class="root-label">Root & Origin</div><div class="root-text">${w.root}</div></div>` : ''}
-    ${w.primary_usage ? `<div class="primary-block">
-      <div class="primary-header">
+    ${w.root?`<div class="root-block"><div class="root-lbl">Root & Origin</div><div class="root-txt">${w.root}</div></div>`:''}
+    ${w.primary_usage?`<div class="primary-block">
+      <div class="primary-hd">
         <span class="primary-badge">${w.primary_usage.label||'MOST COMMON'}</span>
-        <div class="freq-track"><div class="freq-fill-bar" style="width:${w.primary_usage.frequency||80}%"></div></div>
+        <div class="freq-track"><div class="freq-bar" style="width:${w.primary_usage.frequency||80}%"></div></div>
         <span class="freq-pct">${w.primary_usage.frequency||80}%</span>
       </div>
-      <div class="primary-text">${w.primary_usage.text}</div>
-      ${w.primary_usage.example_en ? `<div class="example-block">
-        <div class="ex-en">"${w.primary_usage.example_en}"</div>
-        <span class="tr-toggle-btn" onclick="toggleExTr('ex-tr-0')">🇹🇷 TR</span>
-        <div class="ex-tr" id="ex-tr-0">${w.primary_usage.example_tr||''}</div>
-      </div>` : ''}
-    </div>` : ''}
+      <div class="primary-txt">${w.primary_usage.text}</div>
+      ${primExHTML?`<div class="ex-list">${primExHTML}</div>`:''}
+    </div>`:''}
     ${secHTML}
-    ${isKnown ? `<div class="known-bar"><span class="known-badge">✓ Marked as known</span><span class="undo-btn" onclick="undoKnown()">Undo</span></div>` : ''}
-    <div class="swipe-hint">← prev · → next · ✦ story</div>
+    ${isKnown?`<div class="known-row"><span class="known-lbl">✓ Marked as known</span><span class="undo-btn" onclick="undoKnown()">Undo</span></div>`:''}
+    <div class="swipe-hint">← prev · → next · ✦ story mode</div>
   `;
-  document.getElementById('card-inner').scrollTop = 0;
+  document.getElementById('card-inner').scrollTop=0;
 }
 
-function toggleExTr(id) { document.getElementById(id)?.classList.toggle('vis'); }
-function toggleSecTr(id) { document.getElementById(id)?.classList.toggle('vis'); }
+function toggleTr(id){ document.getElementById(id)?.classList.toggle('vis'); }
 
 function toggleKnown() {
-  if (!currentPack || !currentPack.words[currentWordIndex]) return;
-  const w = currentPack.words[currentWordIndex].word;
-  if (!currentPack.known) currentPack.known = [];
-  if (currentPack.known.includes(w)) {
-    currentPack.known = currentPack.known.filter(x => x !== w);
-    showToast('Removed from known');
-  } else {
-    currentPack.known.push(w);
-    showToast('Marked as known ✓');
-    setTimeout(() => nextCard(), 400);
-  }
-  savePacks();
-  renderCard(currentWordIndex);
+  if(!currentPack||!currentPack.words[currentWordIdx]) return;
+  const w=currentPack.words[currentWordIdx].word;
+  if(!currentPack.known) currentPack.known=[];
+  if(currentPack.known.includes(w)){ currentPack.known=currentPack.known.filter(x=>x!==w); showToast('Removed from known'); }
+  else { currentPack.known.push(w); showToast('Marked as known ✓'); setTimeout(()=>nextCard(),350); }
+  savePacks(); renderCard(currentWordIdx);
 }
+function undoKnown(){
+  if(!currentPack) return;
+  const w=currentPack.words[currentWordIdx]?.word;
+  currentPack.known=(currentPack.known||[]).filter(x=>x!==w);
+  savePacks(); renderCard(currentWordIdx); showToast('Removed from known');
+}
+function nextCard(){ currentWordIdx<(currentPack?.words?.length||1)-1?(currentWordIdx++,renderCard(currentWordIdx)):showToast('Last word — tap ✦ for story'); }
+function prevCard(){ currentWordIdx>0&&(currentWordIdx--,renderCard(currentWordIdx)); }
+function speakWord(w){ if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance(w);u.lang='en-US';u.rate=0.85;speechSynthesis.speak(u);} }
 
-function undoKnown() {
-  if (!currentPack || !currentPack.words[currentWordIndex]) return;
-  const w = currentPack.words[currentWordIndex].word;
-  currentPack.known = (currentPack.known||[]).filter(x => x !== w);
-  savePacks();
-  renderCard(currentWordIndex);
-  showToast('Removed from known');
-}
-
-function nextCard() {
-  if (currentWordIndex < (currentPack?.words?.length||1)-1) { currentWordIndex++; renderCard(currentWordIndex); }
-  else showToast('Last word! Tap ✦ for Story Mode');
-}
-function prevCard() {
-  if (currentWordIndex > 0) { currentWordIndex--; renderCard(currentWordIndex); }
-}
-
-function speakWord(word) {
-  if ('speechSynthesis' in window) { const u = new SpeechSynthesisUtterance(word); u.lang='en-US'; u.rate=0.85; window.speechSynthesis.speak(u); }
-}
+// touch swipe cards
+let tcY=0;
+document.getElementById('cards-cont').addEventListener('touchstart',e=>{tcY=e.touches[0].clientY;},{passive:true});
+document.getElementById('cards-cont').addEventListener('touchend',e=>{const dy=tcY-e.changedTouches[0].clientY;if(Math.abs(dy)>50){dy>0?nextCard():prevCard();}},{passive:true});
 
 // ── STORY ──
-function openStory() {
-  if (!currentPack) return;
-  document.getElementById('story-pack-name').textContent = currentPack.name;
-  document.getElementById('story-meta').textContent = `${currentPack.words.length} words · regenerate anytime`;
-  renderWordChips();
+function openStory(){
+  if(!currentPack) return;
+  document.getElementById('story-pack-name').textContent=currentPack.name;
+  document.getElementById('story-meta').textContent=`${currentPack.words.length} words · regenerate anytime`;
+  updateStoryChips(null);
   showScreen('story');
   generateStory();
 }
-
-function renderWordChips() {
-  document.getElementById('story-word-chips').innerHTML = (currentPack?.words||[]).slice(0,14).map(w => `<div class="w-chip">${w.word}</div>`).join('');
+function updateStoryChips(usedSet){
+  document.getElementById('story-chips').innerHTML=(currentPack?.words||[]).slice(0,16).map(w=>{
+    const used=usedSet?usedSet.has(w.word.toLowerCase()):false;
+    return `<div class="w-chip ${used?'used':''}">${w.word}</div>`;
+  }).join('');
 }
 
-let toneOpen = false;
-function toggleToneDrawer() {
-  toneOpen = !toneOpen;
-  document.getElementById('tone-drawer').classList.toggle('open', toneOpen);
-  document.getElementById('tone-chev').classList.toggle('open', toneOpen);
-}
-function selectTone(el) {
-  document.querySelectorAll('.tone-chip').forEach(t => t.classList.remove('on'));
-  el.classList.add('on');
-  currentTone = el.textContent;
-  document.getElementById('active-tone').textContent = currentTone;
-  toggleToneDrawer();
-}
+let toneOpen=false;
+function toggleToneDrawer(){ toneOpen=!toneOpen; document.getElementById('tone-drawer').classList.toggle('open',toneOpen); document.getElementById('tone-chev').classList.toggle('open',toneOpen); }
+function selectTone(el){ document.querySelectorAll('.tone-opt').forEach(t=>t.classList.remove('on')); el.classList.add('on'); currentTone=el.textContent; document.getElementById('active-tone').textContent=currentTone; toggleToneDrawer(); }
 
-async function generateStory() {
-  if (!currentPack?.words) return;
-  const topic = document.getElementById('story-topic').value.trim();
-  const words = currentPack.words.map(w => w.word).join(', ');
-  document.getElementById('story-content').innerHTML = `<div class="story-loading"><div class="spinner"></div><p>Writing your story...</p></div>`;
-  document.getElementById('story-word-chips').innerHTML = (currentPack.words||[]).slice(0,14).map(w=>`<div class="w-chip">${w.word}</div>`).join('');
-
-  const topicLine = topic ? `The story must be centered around the theme or setting of: "${topic}".` : '';
-  const prompt = `Write a ${currentTone.toLowerCase()} immersive short story (350-450 words) for an English vocabulary learner.
+async function generateStory(){
+  if(!currentPack?.words) return;
+  const topic=document.getElementById('story-topic').value.trim();
+  const words=currentPack.words.map(w=>w.word).join(', ');
+  document.getElementById('story-content').innerHTML=`<div class="story-load"><div class="spinner"></div><p>Writing your story...</p></div>`;
+  updateStoryChips(null);
+  const prompt=`Write a ${currentTone.toLowerCase()} immersive short story (350–450 words) for an English vocabulary learner.
 Rules:
-- Naturally use ALL of these words at least once, most at least twice: ${words}
-- Make the meaning of each word feel clear from context
-- Emotionally engaging, modern, human — NOT textbook-like
-- ${topicLine}
-- Wrap vocabulary words in <b> tags
-- Fluent modern American English
-- No titles, no preamble — just the story directly
+- Naturally use ALL of these words, most at least twice: ${words}
+- Make each word's meaning feel clear from context
+- Emotionally engaging, cinematic, human — not textbook-like
+${topic?`- The story must be centered around: "${topic}"`:''}
+- Wrap each vocabulary word in <b> tags every time it appears
+- Fluent modern English. No title, no preamble.
 
 Story:`;
-
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1200, messages: [{ role:'user', content: prompt }] })
-    });
-    const data = await res.json();
-    storyText = data.content[0].text;
-    const styled = storyText.replace(/<b>(.*?)<\/b>/g, '<span class="hw">$1</span>');
-    document.getElementById('story-content').innerHTML = `<div class="story-text">${styled.replace(/\n\n/g,'<br><br>')}</div>`;
-    // update chips
-    document.getElementById('story-word-chips').innerHTML = (currentPack.words||[]).slice(0,14).map(w => {
-      const used = storyText.toLowerCase().includes(w.word.toLowerCase());
-      return `<div class="w-chip ${used?'used':''}">${w.word}</div>`;
-    }).join('');
-  } catch(e) {
-    document.getElementById('story-content').innerHTML = `<div class="story-loading"><p style="color:var(--text3)">Error: ${e.message}</p></div>`;
+    const text=await callAI(prompt,1300);
+    storyText=text;
+    const styled=text.replace(/<b>(.*?)<\/b>/g,'<span class="hw">$1</span>');
+    document.getElementById('story-content').innerHTML=`<div class="story-txt">${styled.replace(/\n\n/g,'<br><br>')}</div>`;
+    const used=new Set((text.match(/<b>(.*?)<\/b>/gi)||[]).map(m=>m.replace(/<\/?b>/g,'').toLowerCase()));
+    updateStoryChips(used);
+  } catch(e){
+    document.getElementById('story-content').innerHTML=`<div class="story-load"><p style="color:var(--text3)">Error: ${e.message}</p></div>`;
   }
 }
 
-function listenStory() {
-  if (!storyText) { showToast('Generate a story first'); return; }
-  if (isSpeaking) {
-    window.speechSynthesis.cancel();
-    isSpeaking = false;
-    document.getElementById('listen-btn').textContent = '▶ Listen to story';
-    return;
-  }
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const clean = storyText.replace(/<[^>]*>/g,'');
-    const u = new SpeechSynthesisUtterance(clean);
-    u.lang = 'en-US'; u.rate = 0.88;
-    u.onstart = () => { isSpeaking = true; document.getElementById('listen-btn').textContent = '⏹ Stop listening'; };
-    u.onend = () => { isSpeaking = false; document.getElementById('listen-btn').textContent = '▶ Listen to story'; };
-    window.speechSynthesis.speak(u);
-  }
+function listenStory(){
+  if(!storyText){showToast('Generate a story first');return;}
+  if(speaking){speechSynthesis.cancel();speaking=false;document.getElementById('listen-btn').innerHTML='▶ Listen to story';return;}
+  speechSynthesis.cancel();
+  const clean=storyText.replace(/<[^>]*>/g,'');
+  const u=new SpeechSynthesisUtterance(clean);
+  u.lang='en-US';u.rate=0.88;
+  u.onstart=()=>{speaking=true;document.getElementById('listen-btn').innerHTML='⏹ Stop listening';};
+  u.onend=()=>{speaking=false;document.getElementById('listen-btn').innerHTML='▶ Listen to story';};
+  speechSynthesis.speak(u);
 }
 
 // ── QUICK LOOKUP ──
-async function lookupWord() {
-  const word = document.getElementById('ql-input').value.trim();
-  if (!word) return;
-  const result = document.getElementById('ql-result');
-  result.className = 'ql-result vis';
-  result.innerHTML = `<div class="ql-loading"><div class="spinner" style="width:24px;height:24px"></div><p>Analyzing "${word}"...</p></div>`;
+async function lookupWord(){
+  const word=document.getElementById('ql-inp').value.trim();
+  if(!word) return;
+  const res=document.getElementById('ql-result');
+  res.className='ql-result vis';
+  res.innerHTML=`<div class="ql-load"><div class="spinner" style="width:24px;height:24px;border-width:1.5px"></div><p>Analyzing "${word}"...</p></div>`;
 
-  const prompt = `Analyze this English word for a Turkish speaker: "${word}"
-Return ONLY valid JSON, no markdown:
+  const prompt=`Analyze the English word "${word}" deeply for a Turkish speaker learning advanced English.
+Return ONLY valid JSON — no markdown, no backticks:
 {
   "word": "${word}",
   "type": "part of speech",
   "ipa": "/pronunciation/",
-  "tr_quick": "Turkish meaning",
-  "most_common": "What this word most commonly means in real everyday usage by native speakers (2-3 sentences)",
-  "example": "A natural example sentence using the word",
-  "nuance": "Key nuance, tone, or cultural context native speakers understand about this word"
+  "tr_quick": "Turkish translation",
+  "most_common": {
+    "text": "2-3 sentence explanation of the most common real-world usage by native speakers",
+    "examples": [
+      {"en": "natural example sentence 1", "tr": "Turkish translation 1"},
+      {"en": "natural example sentence 2", "tr": "Turkish translation 2"},
+      {"en": "natural example sentence 3", "tr": "Turkish translation 3"}
+    ]
+  },
+  "other_usages": [
+    {
+      "tag": "EMOTIONAL / SLANG / FORMAL etc",
+      "text": "Explanation of this usage in 1-2 sentences",
+      "examples": [
+        {"en": "example sentence 1", "tr": "Turkish translation 1"},
+        {"en": "example sentence 2", "tr": "Turkish translation 2"},
+        {"en": "example sentence 3", "tr": "Turkish translation 3"}
+      ]
+    }
+  ],
+  "nuance": "Key nuance, tone, or cultural context native speakers intuitively understand"
 }`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 600, messages: [{ role:'user', content: prompt }] })
-    });
-    const data = await res.json();
-    const text = data.content[0].text.trim().replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
-    const w = JSON.parse(text);
-    result.innerHTML = `
+    const text=await callAI(prompt,900);
+    const clean=text.trim().replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
+    const w=JSON.parse(clean);
+
+    const primExHTML=(w.most_common?.examples||[]).map((ex,ei)=>`
+      <div class="ql-ex-item" onclick="toggleTr('qlp_${ei}')">
+        <div class="ql-ex-en">"${ex.en}"</div>
+        <div class="ql-ex-tap">Tap for Turkish</div>
+        <div class="ql-ex-tr" id="qlp_${ei}">${ex.tr||''}</div>
+      </div>`).join('');
+
+    const otherHTML=(w.other_usages||[]).map((u,ui)=>{
+      const exHTML=(u.examples||[]).map((ex,ei)=>`
+        <div class="ql-ex-item" onclick="toggleTr('qlo_${ui}_${ei}')">
+          <div class="ql-ex-en">"${ex.en}"</div>
+          <div class="ql-ex-tap">Tap for Turkish</div>
+          <div class="ql-ex-tr" id="qlo_${ui}_${ei}">${ex.tr||''}</div>
+        </div>`).join('');
+      return `<div class="ql-section">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+          <span class="ql-type">${u.tag}</span>
+        </div>
+        <div class="ql-sec-txt">${u.text}</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">${exHTML}</div>
+      </div>`;
+    }).join('');
+
+    res.innerHTML=`
       <div>
         <div class="ql-word">${w.word}</div>
-        <div class="ql-ipa">
+        <div class="ql-ipa-row">
           <div class="ql-play" onclick="speakWord('${w.word}')">▶</div>
-          <span>${w.ipa||''}</span>
-          <span style="margin-left:6px;background:var(--accent-bg);border:.5px solid var(--accent-border);color:var(--accent);font-size:9px;padding:2px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.06em">${w.type||''}</span>
+          <span class="ql-ipa">${w.ipa||''}</span>
+          <span class="ql-type">${w.type||''}</span>
         </div>
       </div>
-      <div class="ql-tr">🇹🇷 ${w.tr_quick||''}</div>
+      <div class="ql-tr-strip">🇹🇷 ${w.tr_quick||''}</div>
       <div class="ql-section">
-        <div class="ql-section-label">Most Common Use</div>
-        <div class="ql-section-text">${w.most_common||''}</div>
-        ${w.example ? `<div class="ql-example">"${w.example}"</div>` : ''}
+        <div class="ql-sec-lbl">Most Common Use</div>
+        <div class="ql-sec-txt">${w.most_common?.text||''}</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">${primExHTML}</div>
       </div>
-      ${w.nuance ? `<div class="ql-section">
-        <div class="ql-section-label">Native Nuance</div>
-        <div class="ql-section-text">${w.nuance}</div>
-      </div>` : ''}
+      ${otherHTML}
+      ${w.nuance?`<div class="ql-section">
+        <div class="ql-sec-lbl">Native Nuance</div>
+        <div class="ql-sec-txt">${w.nuance}</div>
+      </div>`:''}
     `;
-  } catch(e) {
-    result.innerHTML = `<p style="color:var(--text3);font-size:13px">Error: ${e.message}</p>`;
+  } catch(e){
+    res.innerHTML=`<p style="color:var(--text3);font-size:13px;padding:10px 0">Error: ${e.message}</p>`;
   }
 }
 
-// ── UTILS ──
-function savePacks() { localStorage.setItem('wb_packs', JSON.stringify(packs)); }
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
-
-let touchStartY = 0;
-document.getElementById('cards-container').addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, {passive:true});
-document.getElementById('cards-container').addEventListener('touchend', e => {
-  const dy = touchStartY - e.changedTouches[0].clientY;
-  if (Math.abs(dy) > 50) { dy > 0 ? nextCard() : prevCard(); }
-}, {passive:true});
+function savePacks(){ localStorage.setItem('wb_packs',JSON.stringify(packs)); }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 </script>
 </body>
 </html>
